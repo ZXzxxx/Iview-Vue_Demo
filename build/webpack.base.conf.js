@@ -64,7 +64,15 @@ module.exports = {
           limit: 10000,
           name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
         }
-      }
+      },
+      {
+        test: /\.less$/,
+        loader: 'style-loader!css-loader!less-loader'
+        // use: ExtractTextPlugin.extract({
+        //     use: ['css-loader?minimize','autoprefixer-loader', 'less-loader'],
+        //     fallback: 'style-loader'
+        // }),
+      },
     ]
   },
   node: {
