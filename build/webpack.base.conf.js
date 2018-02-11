@@ -1,3 +1,5 @@
+//添加依赖时，需要动，其他不用动
+
 'use strict'
 const path = require('path')
 const utils = require('./utils')
@@ -13,17 +15,17 @@ function resolve (dir) {
 module.exports = {
   context: path.resolve(__dirname, '../'),
   entry: {
-    app: './src/main.js'
+    app: './src/main.js'  //此处定义的是入口文件
   },
   output: {
-    path: config.build.assetsRoot,
-    filename: '[name].js',
+    path: config.build.assetsRoot, //输出路径
+    filename: '[name].js',  //配置生成的文件名
     publicPath: process.env.NODE_ENV === 'production'
       ? config.build.assetsPublicPath
       : config.dev.assetsPublicPath
   },
   resolve: {
-    extensions: ['.js', '.vue', '.json'],
+    extensions: ['.js', '.vue', '.json'],   //模块后缀名
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
       '@': resolve('src'),

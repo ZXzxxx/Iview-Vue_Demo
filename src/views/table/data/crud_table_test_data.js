@@ -1,173 +1,35 @@
-export const table1Columns = [
-    {
-        title: '序号',
-        type: 'index',
-        width: 80,
-        align: 'center'
-    },
-    {
-        title: '姓名',
-        align: 'center',
-        key: 'name',
-        editable: true
-    },
-    {
-        title: '性别',
-        align: 'center',
-        key: 'sex'
-    },
-    {
-        title: '岗位',
-        align: 'center',
-        key: 'work',
-        editable: true
-    },
-    {
-        title: '操作',
-        align: 'center',
-        width: 120,
-        key: 'handle',
-        handle: ['delete']
-    }
-];
-
-export const table1Data = [
-    {
-        name: 'Aresn',
-        sex: '男',
-        work: '前端开发'
-    },
-    {
-        name: 'Lison',
-        sex: '男',
-        work: '前端开发'
-    },
-    {
-        name: 'lisa',
-        sex: '女',
-        work: '程序员鼓励师'
-    }
-];
-
-export const editInlineColumns = [
-    {
-        title: '序号',
-        type: 'index',
-        width: 80,
-        align: 'center'
-    },
-    {
-        title: '姓名',
-        align: 'center',
-        key: 'name',
-        width: 90,
-        editable: true
-    },
-    {
-        title: '性别',
-        align: 'center',
-        key: 'sex'
-    },
-    {
-        title: '岗位',
-        align: 'center',
-        key: 'work',
-        width: 150,
-        editable: true
-    },
-    {
-        title: '操作',
-        align: 'center',
-        width: 190,
-        key: 'handle',
-        handle: ['edit', 'delete']
-    }
-];
-
-export const editInlineData = [
-    {
-        name: 'Aresn',
-        sex: '男',
-        work: '前端开发'
-    },
-    {
-        name: 'Lison',
-        sex: '男',
-        work: '前端开发'
-    },
-    {
-        name: 'lisa',
-        sex: '女',
-        work: '程序员鼓励师'
-    }
-];
-
-export const editIncellColumns = [
-    {
-        title: '序号',
-        type: 'index',
-        width: 80,
-        align: 'center'
-    },
-    {
-        title: '姓名',
-        align: 'center',
-        key: 'name',
-        width: 120,
-        editable: true
-    },
-    {
-        title: '性别',
-        align: 'center',
-        key: 'sex'
-    },
-    {
-        title: '岗位',
-        align: 'center',
-        width: 160,
-        key: 'work',
-        editable: true
-    },
-    {
-        title: '操作',
-        align: 'center',
-        width: 120,
-        key: 'handle',
-        handle: ['delete']
-    }
-];
-
-export const editIncellData = [
-    {
-        name: 'Aresn',
-        sex: '男',
-        work: '前端开发'
-    },
-    {
-        name: 'Lison',
-        sex: '男',
-        work: '前端开发'
-    },
-    {
-        name: 'lisa',
-        sex: '女',
-        work: '程序员鼓励师'
-    }
-];
-
 export const editInlineAndCellColumn = [
     {
         title: '序号',
-        type: 'index',
-        width: 80,
-        align: 'center'
+        type: 'index',   //列类型
+        width: 80, //宽度
+        align: 'center' //字体居中
     },
     {
         title: '姓名',
         align: 'center',
-        key: 'name',
+        key: 'name', //对应列内容的字段名[和json一致]
         width: 300,
-        editable: true
+        editable: true,  //可编辑
+        sortable: true,  //可排序
+        // filters: [
+        //     {
+        //         label: 'Greater than 4000',
+        //         value: 1
+        //     },
+        //     {
+        //         label: 'Less than 4000',
+        //         value: 2
+        //     }
+        // ],
+        // filterMultiple: false,
+        // filterMethod (value, row) {
+        //     if (value === 1) {
+        //         return row.show > 4000;
+        //     } else if (value === 2) {
+        //         return row.show < 4000;
+        //     }
+        // }
     },
     {
         title: '性别',
@@ -179,13 +41,18 @@ export const editInlineAndCellColumn = [
         align: 'center',
         width: 300,
         key: 'work',
-        editable: true
+        editable: true,
+        cellType: 'object',
+        // render: function(h, params) {
+        //     return h('div',
+        //        this.row.work[description]);
+        // }
     },
     {
         title: '操作',
         align: 'center',
         width: 200,
-        key: 'handle',
+        key: 'handle',  // 定义handle关键字
         handle: ['edit', 'delete']
     }
 ];
@@ -194,17 +61,47 @@ export const editInlineAndCellData = [
     {
         name: 'Aresn',
         sex: '男',
-        work: '前端开发'
+        work: "前端"
+        // work: [
+        //     {
+        //         value:"前端",
+        //         label:"前端",
+        //     },
+        //     {
+        //         value:"后端",
+        //         label:"后端",                
+        //     }
+        // ]
     },
     {
         name: 'Lison',
         sex: '男',
-        work: '前端开发'
+        work: "前端"
+        // work: [
+        //     {
+        //         value:"前端",
+        //         label:"前端",
+        //     },
+        //     {
+        //         value:"后端",
+        //         label:"后端",                
+        //     }
+        // ]
     },
     {
         name: 'lisa',
         sex: '女',
-        work: '程序员鼓励师'
+        work: "前端"
+        // work: [
+        //     {
+        //         value:"前端",
+        //         label:"前端",
+        //     },
+        //     {
+        //         value:"后端",
+        //         label:"后端",                
+        //     }
+        // ]
     }
 ];
 
@@ -237,12 +134,6 @@ export const showCurrentColumns = [
 ];
 
 const tableData = {
-    table1Columns: table1Columns,
-    table1Data: table1Data,
-    editInlineColumns: editInlineColumns,
-    editInlineData: editInlineData,
-    editIncellColumns: editIncellColumns,
-    editIncellData: editIncellData,
     editInlineAndCellColumn: editInlineAndCellColumn,
     editInlineAndCellData: editInlineAndCellData,
     showCurrentColumns: showCurrentColumns

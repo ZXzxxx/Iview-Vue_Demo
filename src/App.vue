@@ -3,14 +3,15 @@
 <template>
   <div id="app" class="app-main">
     <!-- <img src="./assets/logo.png"> -->
-    <!-- 这个是啥?为啥必须有-->
+    <!-- router-view指的是路由下的数据，用来展示当前下面路由所利用的组件
+        子页面的内容注入到  router-view中 -->
     <router-view/>  
   </div>
 </template>
 
 <script>
 export default {
-  name: 'App'  //为什么要有name??哪里用到了
+  // name: 'App'  //为什么要有name??哪里用到了
 }
 </script>
 

@@ -1,3 +1,5 @@
+//不用管，不用动
+
 'use strict'
 const utils = require('./utils')
 const config = require('../config')
@@ -7,14 +9,15 @@ const sourceMapEnabled = isProduction
   : config.dev.cssSourceMap
 
 module.exports = {
-  // loaders: utils.cssLoaders({
-  //   sourceMap: sourceMapEnabled,
-  //   extract: isProduction
-  // }),
-  loaders: {
-    css: 'vue-style-loader!css-loader',
-    less: 'vue-style-loader!css-loader!less-loader'
-  },
+  loaders: utils.cssLoaders({
+    sourceMap: sourceMapEnabled,
+    extract: isProduction
+  }),
+  //???不知道这是啥
+  // loaders: {
+  //   css: 'vue-style-loader!css-loader',
+  //   less: 'vue-style-loader!css-loader!less-loader'
+  // },
   cssSourceMap: sourceMapEnabled,
   cacheBusting: config.dev.cacheBusting,
   transformToRequire: {

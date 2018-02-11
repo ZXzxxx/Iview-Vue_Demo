@@ -4,319 +4,267 @@
     @import 'edit-table.less';
 </style>
 
+<!--分页××   其他√-->
 <template>
     <div>
-        <!--
-            绑定属性ref = refs
-                   columns = columnsList
-                   data = thisTableData
-            border 表格有边界
-            disabled-hover  ？？？
-        -->
-        <Table :ref="refs" :columns="columnsList" :data="thisTableData" border disabled-hover>
-        </Table>
+        <Card style="height:auto">
+            <p slot="title" height= "50px">
+                <!--图标-->
+                <Icon type="grid"/>
+                XXX
+            </p>
+            <Collapse>
+                <Panel>
+                    <Icon type="search" color="#1290ca"/> 
+                    <slot name="table-title"></slot>  
+                    <p slot="content">
+                        <slot name="search-content"></slot>   <!--插入查询框框Dom--> 
+                    </p>                           
+                </Panel>
+            </Collapse>
+            <!--
+                    注意!!!    如果想自定义列的颜色的话，就不能用斑马线属性stripe
+            -->
+            <Table :ref="refName" :columns="columnsList" :data="thisTableData" size="small" stripe></Table>
+            <!--分页-->
+            <div style="margin: 10px;overflow: hidden">
+                <div style="float: right;">
+                    <!-- <Page :total="pageTotal" :current="pageNum" :page-size="pageSize" size="small" show-elevator show-sizer show-total
+                            @on-change="handlePage" @on-page-size-change="handlePageSize"></Page> -->
+                </div>
+            </div>
+        </Card>
     </div>
 </template>
 
 <script>
-const editButton = (vm, h, currentRow, index) => {
-    return h('Button', {
-        props: {
-            type: currentRow.editting ? 'success' : 'primary',
-            loading: currentRow.saving
-        },
-        style: {
-            margin: '0 5px'
-        },
-        on: {
-            'click': () => {
-                if (!currentRow.editting) {
-                    if (currentRow.edittingCell) {
-                        for (let name in currentRow.edittingCell) {
-                            currentRow.edittingCell[name] = false;
-                            vm.edittingStore[index].edittingCell[name] = false;
-                        }
-                    }
-                    vm.edittingStore[index].editting = true;
-                    vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));
-                } else {
-                    vm.edittingStore[index].saving = true;
-                    vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));
-                    let edittingRow = vm.edittingStore[index];
-                    edittingRow.editting = false;
-                    edittingRow.saving = false;
-                    vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));
-                    vm.$emit('input', vm.handleBackdata(vm.thisTableData));
-                    vm.$emit('on-change', vm.handleBackdata(vm.thisTableData), index);
-                }
-            }
-        }
-    }, currentRow.editting ? '保存' : '编辑');
-};
+import tableCellType from './base/table-cell-type';
+import tableSelect from './base/tableSelect';
+import inputNum from './base/inputNum';
 
-//删除按钮
-const deleteButton = (vm, h, currentRow, index) => {
-    return h('Poptip', {   //iview的气泡提示
-        props: {
-            confirm: true,
-            title: '您确定要删除这条数据吗?',
-            transfer: true
-        },
-        on: {  //点击ok触发删除
-            'on-ok': () => {
-                vm.thisTableData.splice(index, 1).splice(index, 1);//从该数组中删除下标为index的数据，1表示只删除一条
-                vm.$emit('input', vm.handleBackdata(vm.thisTableData));
-                vm.$emit('on-delete', vm.handleBackdata(vm.thisTableData), index);
-            }
-        }
-    }, [
-        h('Button', {
-            style: {
-                margin: '0 5px'
-            },
-            props: {
-                type: 'error',
-                placement: 'top' //气泡弹出的位置
-            }
-        }, '删除')
-    ]);
-};
-const incellEditBtn = (vm, h, param) => {
-    if (vm.hoverShow) {
-        return h('div', {
-            'class': {
-                'show-edit-btn': vm.hoverShow
-            }
-        }, [
-            h('Button', {
-                props: {
-                    type: 'text',
-                    icon: 'edit'
-                },
-                on: {
-                    click: (event) => {
-                        vm.edittingStore[param.index].edittingCell[param.column.key] = true;
-                        vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));
-                    }
-                }
-            })
-        ]);
-    } else {
-        return h('Button', {
-            props: {
-                type: 'text',
-                icon: 'edit'
-            },
-            on: {
-                click: (event) => {
-                    vm.edittingStore[param.index].edittingCell[param.column.key] = true;
-                    vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));
-                }
-            }
-        });
-    }
-};
-const saveIncellEditBtn = (vm, h, param) => {
-    return h('Button', {
-        props: {
-            type: 'text',
-            icon: 'checkmark'
-        },
-        on: {
-            click: (event) => {
-                vm.edittingStore[param.index].edittingCell[param.column.key] = false;
-                vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));
-                vm.$emit('input', vm.handleBackdata(vm.thisTableData));
-                vm.$emit('on-cell-change', vm.handleBackdata(vm.thisTableData), param.index, param.column.key);
-            }
-        }
-    });
-};
-const cellInput = (vm, h, param, item) => {
-    return h('Input', {
-        props: {
-            type: 'text',
-            value: vm.edittingStore[param.index][item.key]
-        },
-        on: {
-            'on-change' (event) {
-                let key = item.key;
-                vm.edittingStore[param.index][key] = event.target.value;
-            }
-        }
-    });
-};
-//把一些默认东西暴露出来？？？
+//暴露出来，外部才能找到
 export default {
     name: 'crudTable',
-    props: {//定义传进来的参数值的类型
-        refs: String,
-        columnsList: Array,
-        value: Array,
-        url: String,
-        editIncell: { //定义一个是否开启编辑状态的对象
-            type: Boolean,
-            default: false   //默认是false
-        },
-        hoverShow: { //????
-            type: Boolean,
-            default: false
-        }
+    components: {
+        tableSelect,
+        inputNum
     },
-    data () {  //data必须定义为函数形式    function（）==（）
-        return {
-            columns: [],//数组
-            thisTableData: [],
-            edittingStore: []
+    props: {//定义传进来的参数值的类型
+        refName: String,  //组件指针名
+        columnsList: Array,  //表格表头 [根据表格情况定义]
+        value: Array, //表格--数据内容   就是父组件v-model双向绑定的值
+        editIncell: {  //是否可以进行单列编辑,默认false
+            type: Boolean,
+            default: false   
+        },
+
+        allSelectUrls: Object, //存放所有下拉框的url
+    },
+    data () {  //data必须定义为函数形式    : function（）==（）
+        return { //定义自己的数据
+            // pageTotal: 0,
+            thisTableData: [],   //表格--数据内容    这是怎么来的数据,也因为v-model???
+            edittingStore: []    //暂存修改数据  -- 中间变量
         };
     },
     /**
-     * 钩子函数
+     * 钩子函数√
      * 组件初始化好的那一时刻调用的函数
      */
     created (){ 
         this.init();
     },
     methods: {  //定义一些方法的 实现
-        init () { //初始化组件函数
+
+
+        init () { //初始化数据
             /**
              *  使用var声明的变量，其作用域为该语句所在的函数内，且存在变量提升现象；
                 用let声明的变量，其作用域为该语句所在的代码块,即一个{}内，不存在变量提升；[推荐使用这个]
                 使用const声明的是常量，在后面出现的代码中不能再修改该常量的值。
              */
-            let vm = this;
-            //filter():返回一个符合func条件的元素数组
-            let editableCell = this.columnsList.filter(item => {
-                if (item.editable) { //???? 两遍？？
-                    if(item.editable == true) {  //????
+            let vm = this; //vm 的值等于当前组件  只在init()里面起作用
+            //filter():返回一个符合function条件的元素数组
+            //editableCell---可编辑的表头列
+            let editableCell = this.columnsList.filter(item => {   //item是columnsList[表格表头]里的每一个对象
+                if (item.editable) {
+                    if(item.editable == true){
                         return item;
-                    }
-                }
+                    }                    
+                }           
             });
+            //JSON.stringify()  从对象中解析出json字符串
+            //JSON.parse()      将json字符串解析成对象
             let cloneData = JSON.parse(JSON.stringify(this.value));
+            // let cloneData = this.value;
             let res = [];//定义了一个空数组
-            //map():返回一个新的Array，每个元素为调用func的结果
-            //返回item，存放到cloneData这个集合中
-            //这个item
+            //map():返回一个新的Array，每个元素为调用function的结果
+
+            //定义带有判断单列编辑新属性的集合  [如果不需要进行单列编辑,就不需要这个]
             res = cloneData.map((item,index) => {
                 let isEditting = false;
                 /**
-                 * 箭头函数里面的this不是该函数的this，箭头函数本身是没有this的
+                 * 箭头函数里面的this不是该箭头函数，箭头函数本身是没有this的
                  * 这个this指的是这个组件对象，也就是定义的这个箭头函数所在的对象
                  */
-                if (this.thisTableData[index]) {  //????
-                    if (this.thisTableData[index].editting) { //处于编辑状态
+                if (this.thisTableData[index]) {  //单列编辑的时候触发
+                    console.log("进这里1");
+                    if (this.thisTableData[index].editting) { //true---正在编辑状态
                         isEditting = true;
-                    } else {
-                        //for循环
-                        for (const cell in this.thisTableData[index].edittingCell){ //为什么能这样.来.去？？？
-                            if(this.thisTableData[index].edittingCell[cell] == true){
+                    } else { //不是正在编辑状态
+                        //for循环 遍历可编辑的列这个object属性
+                        for (const cell in this.thisTableData[index].edittingCell){ 
+                            if(this.thisTableData[index].edittingCell[cell] == true){ 
                                 isEditting = true;
                             }
                         }  
                     }                   
                 }
-                if (isEditting) {
-                    return this.thisTableData[index];
-                }else{
-                    //this是这个组件
-                    this.$set(item, 'editting', false);//设置可编辑状态为false？？？
-                    let edittingCell = {};//定义一个集合
-                    //遍历存着所有可编辑的列的集合
+                if (isEditting) {  //单列编辑的时候触发,还没测试出进这里
+                    console.log("进这里2");
+                    return this.thisTableData[index]; 
+                }else{  //isEditting为false时
+                    this.$set(item, 'editting', false);  //添加新属性  editting
+                    let edittingCell = {};  //对象
+                    //遍历可编辑的表头列的集合
                     editableCell.forEach(item => {
-                        edittingCell[item.key] = false//把editable里面的item放到edittingCell集合里面，并把值设定为fasle
+                        edittingCell[item.key] = false //item.key值作为属性名，属性值为false
                     });
-                    this.$set(item, 'edittingCell', edittingCell);
-                    return item;//??不明白这个item是什么
+                    this.$set(item, 'edittingCell', edittingCell);  //添加新属性  edittingCell
+                    return item;
                 }
             });
-            this.thisTableData = res;//等于这个前面得到好的这个数组，具体内容？？？
+            this.thisTableData = res;   
             this.edittingStore = JSON.parse(JSON.stringify(this.thisTableData));
-           //这是外面传进来的
+            //this.edittingStore = this.thisTableData;
+            
+            //遍历可编辑列头，将可编辑列字段，在编辑状态[单列/行]下打开编辑框
             this.columnsList.forEach(item => {
-                if (item.editable) {
-                    //???render函数不会
-                    item.render = (h, param) => {
-                        let currentRow = this.thisTableData[param.index];//得到当前行
-                        if(!currentRow.editting) {//不是编辑状态
-                            if (this.editIncell) {//???????
-                                //  组件间传值？？
+
+                //如果该表头列是可编辑的
+                if (item.editable) { 
+                    item.render = (h, param) => {  //param  是该行对象
+                        let currentRow = this.thisTableData[param.index];//得到当前行的数据
+                        //editting是false---未编辑[才能进行单列编辑]
+                        if(!currentRow.editting) {
+                            if (this.editIncell) {// 可以进行单列编辑
                                 return h('Row', { //行
                                     props: {
                                         type: 'flex', //传值参数类型是灵活的，即什么类型都可以
-                                        align: 'middle',//位置居中？？？
-                                        justify: 'center',//居中？？？
+                                        align: 'middle',//文字居中
+                                        justify: 'center',//内容居中
                                     }
                                 }, [
-                                    h('Col', { //列
+                                    h('Col', { //数据列
                                         props: {
-                                            span: '22'
+                                            span: '10'
                                         }
                                     }, [
-                                        //?????不明白
-                                        !currentRow.edittingCell[param.column.key] ? h('span', currentRow[item.key]) : cellInput(this, h, param, item)
-                                    ]),//好的列
-                                    h('Col', {//中间那个...的列？
+                                        //单列打开， true时编辑框状态，false时span状态    
+                                        !currentRow.edittingCell[param.column.key] ? h('span', currentRow[item.key]) : tableCellType.cellInputNum(inputNum, vm, h, param, item) //cellInput(this, h, param, item)
+                                    ]),
+                                    h('Col', { //按钮列
                                         props: {
-                                            span: '2'
+                                            span: '1'
                                         }
                                     },[
-                                        //?????不明白
-                                        currentRow.edittingCell[param.column.key] ? saveIncellEditBtn(this, h, param) : incellEditBtn(this, h, param)
+                                        //true时，显示保存，false时显示编辑
+                                        currentRow.edittingCell[param.column.key] ? tableCellType.saveIncellEditBtn(this, h, param) : tableCellType.incellEditBtn(this, h, param)
                                     ])
                                 ]);
-                            } else { //？？？？？？
+                            } else { //否则一直span显示
                                 return h('span', currentRow[item.key]);
-                            }
-                        }else {//是编辑状态
-                            return h('Input', {
-                                props: {
-                                    type: 'text',
-                                    value: currentRow[item.key] //框里要显示着值
-                                },
-                                //绑定事件？？？不懂
-                                on: {
-                                    'on-change' (event) {
-                                        let key = param.column.key;
-                                        vm.edittingStore[param.index][key] = event.target.value;                      
-                                    }
-                                }
-                            });
+                            }                   
                         }
-                    };
+                        //editting是true---编辑状态[只能进行整行编辑]
+                        else {
+                            if(item.cellType === 'object'){  //如果该列是下拉框类型                               
+                               return h(tableSelect,{                                       
+                                    props: {                               
+                                        multipleState: false,  //单选  
+                                        selectList: tableCellType.getSelectData(this, item.key),
+                                        placeholderData: vm.edittingStore[param.index][param.column.key].toString(),  //因为多选的时候，是array，所以toString一下
+                                    },
+                                    on: {
+                                        'select-onChange' (value) {
+                                            let key = param.column.key;                                                                                
+                                            vm.edittingStore[param.index][key] = value; //下拉框选中值变化时，当前选中的值也变化
+                                        }, 
+                                    },
+                                    // nativeOn: {
+                                    //     'initSelectData' () {
+                                    //         console.log("天呢");
+                                    //     }     
+                                    // },
+                                });
+                            }else{
+                                return h('Input', {
+                                    props: {
+                                        type: 'text',
+                                        value: currentRow[item.key] //框里要显示着值
+                                    },
+                                    attrs: {
+                                        placeholder: "不可为空..",
+                                    },
+                                    on: {
+                                        'on-change' (event) {
+                                            let key = param.column.key;
+                                            vm.edittingStore[param.index][key] = event.target.value;                      
+                                        }
+                                    }
+                                });
+                            }
+                        }                        
+                    };//render函数结束
                 }
-                //?????整个不明白？？？？？
-                if (item.handle) {
+
+                //如果该item有handle这一项
+                if (item.handle) {  
                     item.render = (h, param) => {
                         let currentRowData = this.thisTableData[param.index];
                         let children = [];
-                        item.handle.forEach(item => {
+                        item.handle.forEach(item => {  //遍历handle里面的item
                             if (item == 'edit') {
-                                children.push(editButton(this, h, currentRowData, param.index));
-                            } else if (item === 'delete') {
-                                children.push(deleteButton(this, h, currentRowData, param.index));
+                                children.push(tableCellType.editButton(this, h, currentRowData, param.index));
+                            } else {
+                                children.push(tableCellType.deleteButton(this, h, currentRowData, param.index));
                             }                            
                         });
-                        return h('div', children);
+                        return h('div', children);  //按钮组合形式显示
                     };
                 }
             });
         },
+
+
+        //处理成后台需要的数据√
         handleBackdata (data) {
-        let clonedData = JSON.parse(JSON.stringify(data));
-        clonedData.forEach(item => {
-            delete item.editting;
-            delete item.edittingCell;
-            delete item.saving;
-        });
-        return clonedData;
-        }
+            let clonedData = JSON.parse(JSON.stringify(data));  //获取到当前数据---object类型
+
+            clonedData.forEach(item => {  //遍历这些数据的item，删除每个item对应的以下三个属性               
+                delete item.editting;
+                delete item.edittingCell;
+                delete item.saving;
+            });
+            return clonedData; 
+        },
+
+        //分页处理事件××
+        changePage () {
+            // The simulated data is changed directly here, and the actual usage scenario should fetch the data from the server
+            // this.tableData1 = this.mockTableData1();
+        },    
     },
+
+    //监听value的变化×   单列编辑的时候触发
     watch: {
         value (data) {
+            console.log("监听事件发生")
             this.init();
-        }
+        },
     }
 };
 </script>
+
+
 

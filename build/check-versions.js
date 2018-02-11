@@ -1,3 +1,5 @@
+// 不用管，不用动
+
 'use strict'
 const chalk = require('chalk')
 const semver = require('semver')

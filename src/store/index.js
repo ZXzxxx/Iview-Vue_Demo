@@ -1,25 +1,22 @@
-// import Vue from 'vue';
-// import Vuex from 'vuex';
+import Vuex from 'vuex'
+import Vue from 'vue'   //引入它是因为要使用Vue.use
 
 // import app from './modules/app';
 // import user from './modules/user';
 
-// Vue.use(Vuex);
+import tableList from './modules/tableList';
 
-// const store = new Vuex.Store({
-//     state: {
-//         //
-//     },
-//     mutations: {
-//         //
-//     },
-//     actions: {
+Vue.use(Vuex);
 
-//     },
-//     modules: {   //????
-//         app,
-//         user
-//     }
-// });
+//进行模块化构建
+const store = new Vuex.Store({
 
-// export default store;//  暴露出来，外部可以用
+    modules: {  //数据模型
+        tableList
+        // app,
+        // user
+    }
+});
+
+export default store;   //必须暴露出来，外部才可以找到
+

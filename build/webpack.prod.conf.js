@@ -1,3 +1,5 @@
+
+
 'use strict'
 const path = require('path')
 const utils = require('./utils')
@@ -23,12 +25,18 @@ const webpackConfig = merge(baseWebpackConfig, {
       usePostCSS: true
     })
   },
+  // devtool: config.build.productionSourceMap ? config.build.devtool : false,
+  // output: {
+  //   path: 'http://localhost:8080/crudDemo/dist/',  // 修改 https://iv...admin 这部分为你的服务器域名 
+  //   filename: '[name].[hash].js',
+  //   chunkFilename: '[name].[hash].chunk.js'
+  // },
   devtool: config.build.productionSourceMap ? config.build.devtool : false,
   output: {
-    path: 'http://localhost:8080/crudDemo/dist/',  // 修改 https://iv...admin 这部分为你的服务器域名 
-    filename: '[name].[hash].js',
-    chunkFilename: '[name].[hash].chunk.js'
-},
+    path: config.build.assetsRoot,
+    filename: utils.assetsPath('js/[name].[chunkhash].js'),
+    chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
+  },
   plugins: [
     new cleanWebpackPlugin(['dist/*'], {
       root: path.resolve(__dirname, '../')
