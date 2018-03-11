@@ -25,12 +25,6 @@ const webpackConfig = merge(baseWebpackConfig, {
       usePostCSS: true
     })
   },
-  // devtool: config.build.productionSourceMap ? config.build.devtool : false,
-  // output: {
-  //   path: 'http://localhost:8080/crudDemo/dist/',  // 修改 https://iv...admin 这部分为你的服务器域名 
-  //   filename: '[name].[hash].js',
-  //   chunkFilename: '[name].[hash].chunk.js'
-  // },
   devtool: config.build.productionSourceMap ? config.build.devtool : false,
   output: {
     path: config.build.assetsRoot,
