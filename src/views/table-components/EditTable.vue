@@ -38,13 +38,13 @@
 </template>
 
 <script>
-import tableCellType from './base/table-cell-type';
-import tableSelect from './base/tableSelect';
-import inputNum from './base/inputNum';
+import tableCellType from './table-baseUtil/tableCellComponents';
+import tableSelect from './base-components/tableSelect';
+import inputNum from './base-components/inputNum';
 
 //暴露出来，外部才能找到
 export default {
-    name: 'crudTable',
+    // name: 'crudTable',
     components: {
         tableSelect,
         inputNum

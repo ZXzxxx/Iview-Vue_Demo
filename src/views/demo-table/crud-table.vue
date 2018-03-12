@@ -48,12 +48,12 @@
 <script>
 import axios from 'axios';
 
-import editTable from './components/EditTable.vue';
-import yearPicker from './components/base/yearPicker.vue';
-import cascader from './components/base/cascader.vue';
-import allSelectTestData from './data/select_test_data.js';
-import tableData from './data/crud_table_test_data.js';
-import tableSelect from './components/base/tableSelect.vue';
+
+import editTable from '../table-components/EditTable.vue';
+import yearPicker from '../table-components/base-components/yearPicker';
+import cascader from '../table-components/base-components/cascader.vue';
+import tableData from './crudCellTitle';
+import tableSelect from '../table-components/base-components/tableSelect.vue';
 
 export default {
     name: 'table-demo',
