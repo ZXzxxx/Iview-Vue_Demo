@@ -17,13 +17,13 @@
                 <div class="edittable-table-height-con">
                     <edit-table 
                         refName = "crudTable" 
-                        v-model="editInlineAndCellData"
+                        v-model="tableDataList"
                         @on-cell-change="handleCellChange"
                         @on-change="handleChange"
                         @on-delete="handleDel"
                         :editIncell="true"
                         :all-select-urls="crud_selectUrls"
-                        :columns-list="editInlineAndCellColumn">  <!--传参数-->
+                        :columns-list="tableColumsList">  <!--传参数-->
                                                                   <!--插槽，插入需要的Dom-->
                         <span slot="table-title" style="color:#1290ca">XXX-查询</span>
                         <span slot="search-content">
@@ -46,14 +46,15 @@
 
 
 <script>
-import axios from 'axios';
-
-
+//引入js文件
+import tableAxios from '../table-components/table-baseUtil/tableAxios';
+//引入单文件组件
 import editTable from '../table-components/EditTable.vue';
 import yearPicker from '../table-components/base-components/yearPicker';
 import cascader from '../table-components/base-components/cascader.vue';
 import tableData from './crudCellTitle';
 import tableSelect from '../table-components/base-components/tableSelect.vue';
+
 
 export default {
     name: 'table-demo',
@@ -65,55 +66,39 @@ export default {
     },
     data () {
         return {
-            //搜索data
-            searchByName: '',
-
-            // columnsList: [], //用哪了???
-            // tableData: [], //表格数据
-
-            editInlineAndCellColumn: [],
-            editInlineAndCellData: [],  //具体数据
-            initTableData: [], //初始化数据
-           
-            crud_selectUrls: {},
-
+            searchByName: '',//搜索data
+            tableColumsList: [],//表格列
+            tableDataList: [],  //表格具体数据
+            initTableData: [], //初始化数据      
+            crud_selectUrls: {}, //下拉框URL
         };
     },
     methods: {
         //获取数据
-        getData () {
-            // this.columnsList = tableData.table1Columns;//属性名的json串----java实体类属性
-            // this.tableData = tableData.table1Data;//表格内具体的内容的json串----java实体类属性对应的所有数据
-            this.editInlineAndCellColumn = tableData.editInlineAndCellColumn;//其实就只需要这个应该？？？？
-            this.editInlineAndCellData  = this.initTableData = tableData.editInlineAndCellData;//具体数据
-            // this.showCurrentColumns = tableData.showCurrentColumns;//当前数据
-            
-            var allSelectUrls = {     //所有下拉框的url地址
-                    'work' : '123',
-            };  
-
-            this.crud_selectUrls = allSelectUrls;
-
-            
-
+        init () {
+            this.tableColumsList = tableData.editInlineAndCellColumn; //表格表头
+            tableAxios.axiosGet('/static/tableTestData.json', this); //从后台获取表格数据
+            this.crud_selectUrls = {     //所有下拉框的url地址
+                'work' : '/static/departmentTestData.json',   //json这种要放在static里面
+            };           
         },
 
-        handleNetConnect (state) {
-            this.breakConnect = state;
-        },
-        handleLowSpeed (state) {
-            this.lowNetSpeed = state;
-        },
-        getCurrentData () {
-            this.showCurrentTableData = true;
-        },
+        // handleNetConnect (state) {
+        //     this.breakConnect = state;
+        // },
+        // handleLowSpeed (state) {
+        //     this.lowNetSpeed = state;
+        // },
+        // getCurrentData () {
+        //     this.showCurrentTableData = true;
+        // },
         handleDel (val, index) {
             this.$Message.success('删除了第' + (index + 1) + '行数据');
         },
         handleCellChange (val, index, key) {
             this.$Message.success('修改了第 ' + (index + 1) + ' 行列名为 ' + key + ' 的数据');
         },
-        //这里和后台交互
+        //修改在这里后台交互
         handleChange (val, index) {
             this.$Message.success('修改的数据为' + val);
             this.$Message.success('修改了第' + (index + 1) + '行数据');
@@ -134,12 +119,12 @@ export default {
         },
         //执行查询
         handleSearch () {
-            this.editInlineAndCellData = this.initTableData;
-            this.editInlineAndCellData = this.search(this.editInlineAndCellData, {name: this.searchByName});
+            this.tableDataList = this.initTableData;
+            this.tableDataList = this.search(this.tableDataList, {name: this.searchByName});
         }, 
     },
     created () {
-        this.getData();
+        this.init(); //获取数据
     }    
 };
 </script>

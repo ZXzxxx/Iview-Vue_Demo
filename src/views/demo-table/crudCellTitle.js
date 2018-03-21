@@ -33,6 +33,7 @@ export const editInlineAndCellColumn = [
     },
     {
         title: '性别',
+        width: 80, //宽度
         align: 'center',
         key: 'sex'
     },
@@ -57,86 +58,9 @@ export const editInlineAndCellColumn = [
     }
 ];
 
-export const editInlineAndCellData = [
-    {
-        name: 'Aresn',
-        sex: '男',
-        work: "前端"
-        // work: [
-        //     {
-        //         value:"前端",
-        //         label:"前端",
-        //     },
-        //     {
-        //         value:"后端",
-        //         label:"后端",                
-        //     }
-        // ]
-    },
-    {
-        name: 'Lison',
-        sex: '男',
-        work: "前端"
-        // work: [
-        //     {
-        //         value:"前端",
-        //         label:"前端",
-        //     },
-        //     {
-        //         value:"后端",
-        //         label:"后端",                
-        //     }
-        // ]
-    },
-    {
-        name: 'lisa',
-        sex: '女',
-        work: "前端"
-        // work: [
-        //     {
-        //         value:"前端",
-        //         label:"前端",
-        //     },
-        //     {
-        //         value:"后端",
-        //         label:"后端",                
-        //     }
-        // ]
-    }
-];
-
-export const showCurrentColumns = [
-    {
-        title: '序号',
-        type: 'index',
-        width: 80,
-        align: 'center'
-    },
-    {
-        title: '姓名',
-        align: 'center',
-        key: 'name',
-        width: 300,
-        editable: true
-    },
-    {
-        title: '性别',
-        align: 'center',
-        key: 'sex'
-    },
-    {
-        title: '岗位',
-        align: 'center',
-        width: 300,
-        key: 'work',
-        editable: true
-    }
-];
 
 const tableData = {
     editInlineAndCellColumn: editInlineAndCellColumn,
-    editInlineAndCellData: editInlineAndCellData,
-    showCurrentColumns: showCurrentColumns
 };
 
 export default tableData;
