@@ -1,7 +1,3 @@
-// 使用 Vue 的 Render 函数。
-// 传入两个参数，第一个是 h---也就是createElement，第二个为对象param，
-// 对象包含 row、column 和 index，分别指当前行数据，当前列数据，当前行索引，
-
 import axios from 'axios';
 
 //get
@@ -20,7 +16,6 @@ const axiosGet = (url, componentVm) => {
 //put
 //delete
 
-
 //获取下拉框的url
 const selectUrl = (vm, selectName) => {
     let url = vm.allSelectUrls[selectName];
@@ -29,58 +24,58 @@ const selectUrl = (vm, selectName) => {
 
 //行编辑/保存按钮
 const editButton = (vm, h, currentRow, index) => {
-return h('Button', {
-    props: {
-        type: currentRow.editting ? 'success' : 'primary',
-        shape: "circle"
-    },
-    style: {
-        margin: '0 5px'
-    },
-    on: {
-        'click': () => {  //这是点击引发的事件
-            //点击编辑按钮前，这个editting是false状态；点击了之后，才变成了true
-            if (!currentRow.editting) {  //点击编辑按钮，进这里  进入编辑状态  editting为false的时候,显示的是编辑按钮
-                console.log("进入了编辑状态");
-                console.log(currentRow.editting);      
+    return h('Button', {
+        props: {
+            type: currentRow.editting ? 'success' : 'primary',
+            shape: "circle"
+        },
+        style: {
+            margin: '0 5px'
+        },
+        on: {
+            'click': () => {  //这是点击引发的事件
+                //点击编辑按钮前，这个editting是false状态；点击了之后，才变成了true
+                if (!currentRow.editting) {  //点击编辑按钮，进这里  进入编辑状态  editting为false的时候,显示的是编辑按钮
+                    console.log("进入了编辑状态");
+                    console.log(currentRow.editting);      
 
-                if (currentRow.edittingCell) { //可编辑的列 
-                    //现在是行编辑状态,所以要把单个的列编辑状态设为false
-                    for (let cellName in currentRow.edittingCell) {            
-                        currentRow.edittingCell[cellName] = false;
-                        vm.edittingStore[index].edittingCell[cellName] = false;
+                    if (currentRow.edittingCell) { //可编辑的列 
+                        //现在是行编辑状态,所以要把单个的列编辑状态设为false
+                        for (let cellName in currentRow.edittingCell) {            
+                            currentRow.edittingCell[cellName] = false;
+                            vm.edittingStore[index].edittingCell[cellName] = false;
+                        }
                     }
+                    vm.edittingStore[index].editting = true;  //现在是编辑状态
+                    vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));  //当前数据???这里为什么要有
+                    //点击保存按钮前，这个editting是true状态，点击了之后，才变成了false
+                } else {   //点击保存按钮，进这里  进入完成编辑的状态
+                    console.log("测试点击保存editting?");
+                    console.log(currentRow.editting);
+
+                    vm.edittingStore[index].saving = true;  //点击保存按钮之后，这行数据的保存状态才是true
+                    vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));//编辑完成后的新的数据
+                    
+                    console.log("测试这个时候的table数据?");
+                    console.log(vm.thisTableData);
+
+                    let edittingRow = vm.edittingStore[index]; //当前正在编辑的该行的数据
+                    
+                    console.log("测试这个时候的行数据?");
+                    console.log(edittingRow);
+
+                    edittingRow.editting = false;//编辑状态结束
+                    edittingRow.saving = false;//保存状态也结束
+
+                    vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore)); //???又来一遍
+                    //父组件@on-change的时候，可以用这两个参数
+                    vm.$emit('on-change', vm.handleBackdata(vm.thisTableData), index);  
+                    // vm.$emit('input', vm.handleBackdata(vm.thisTableData)); //???目前还没用到
+    
                 }
-                vm.edittingStore[index].editting = true;  //现在是编辑状态
-                vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));  //当前数据???这里为什么要有
-                //点击保存按钮前，这个editting是true状态，点击了之后，才变成了false
-            } else {   //点击保存按钮，进这里  进入完成编辑的状态
-                console.log("测试点击保存editting?");
-                console.log(currentRow.editting);
-
-                vm.edittingStore[index].saving = true;  //点击保存按钮之后，这行数据的保存状态才是true
-                vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));//编辑完成后的新的数据
-                
-                console.log("测试这个时候的table数据?");
-                console.log(vm.thisTableData);
-
-                let edittingRow = vm.edittingStore[index]; //当前正在编辑的该行的数据
-                
-                console.log("测试这个时候的行数据?");
-                console.log(edittingRow);
-
-                edittingRow.editting = false;//编辑状态结束
-                edittingRow.saving = false;//保存状态也结束
-
-                vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore)); //???又来一遍
-                //父组件@on-change的时候，可以用这两个参数
-                vm.$emit('on-change', vm.handleBackdata(vm.thisTableData), index);  
-                // vm.$emit('input', vm.handleBackdata(vm.thisTableData)); //???目前还没用到
-   
             }
         }
-    }
-}, currentRow.editting ? '保存' : '编辑');
+    }, currentRow.editting ? '保存' : '编辑');
 };
 
 //行删除按钮

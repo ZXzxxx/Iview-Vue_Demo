@@ -35,7 +35,7 @@ export const editInlineAndCellColumn = [
         title: '性别',
         width: 80, //宽度
         align: 'center',
-        key: 'sex'
+        key: 'sex',
     },
     {
         title: '岗位',
@@ -44,10 +44,6 @@ export const editInlineAndCellColumn = [
         key: 'work',
         editable: true,
         cellType: 'object',
-        // render: function(h, params) {
-        //     return h('div',
-        //        this.row.work[description]);
-        // }
     },
     {
         title: '操作',

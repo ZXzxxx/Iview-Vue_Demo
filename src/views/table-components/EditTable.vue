@@ -156,7 +156,7 @@ export default {
                                 ]
                             );
                         }else {  //false的时候是单列编辑
-                            if(this.editIncell) {   //可以进行单列编辑
+                            if(this.editIncell) {//可以进行单列编辑的列
                                 //可编辑数据和编辑按钮都在这渲染
                                 return h('Row', { //行
                                     attrs: {
@@ -168,15 +168,15 @@ export default {
                                     h('Col', [  //数据列
                                         //Col里面的元素内容
                                         //单列打开， true时编辑框状态，false时span状态    
-                                        !currentRow.edittingCell[param.column.key] ? h('span', currentRow[item.key]) : tableEles(this, h, param, item)
+                                        !currentRow.edittingCell[param.column.key] ? (item.cellType=="object") ? h('span', currentRow[item.key].value) : h('span', currentRow[item.key]) : tableEles(this, h, param, item)
                                     ]),
                                     h('Col', [  //编辑按钮
                                         //true时，显示保存，false时显示编辑
                                         currentRow.edittingCell[param.column.key] ? tableCellType.saveIncellEditBtn(this, h, param) : tableCellType.incellEditBtn(this, h, param)
                                     ])
                                 ]);
-                            }else{
-                                return h('span', currentRow[item.key]);  //只显示着数据，不显示编辑按钮
+                            }else{//不可以进行单列编辑的列
+                                return (item.cellType=="object") ? h('span', currentRow[item.key].value) : h('span', currentRow[item.key]);  //只显示着数据，不显示编辑按钮
                             }
                         }
                     }

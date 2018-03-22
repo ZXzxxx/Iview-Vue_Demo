@@ -1,4 +1,9 @@
-import selectDatas from './tableAxios';
+// Render 函数
+// 传入两个参数，第一个是 h---也就是createElement，第二个为对象param
+// 对象包含 row、column 和 index，分别指当前行数据，当前列数据，当前行索引
+
+
+
 //引入单文件组件
 import tableSelect from '../base-components/tableSelect';
 import tableInputNum from '../base-components/inputNum';
@@ -28,14 +33,14 @@ const rowSelect = (vm, h, param, item) => {
             multipleState: false, //单选
             selectUrl: vm.allSelectUrls[item.key]    //下拉框URL                 
         },
-        domProps: {
-            value:vm.edittingStore[param.index][param.column.key].toString(), //双向绑定的value要写在domProps里面
-        },
+        // domProps: {
+        //     value:vm.edittingStore[param.index][param.column.key].toString(), //双向绑定的value要写在domProps里面
+        // },
         on: {
             'select-onChange' (value) {
                 let key = param.column.key;
                 vm.edittingStore[param.index][key] = value; //下拉框选中值变化时，当前选中的值也变化
-            }
+            },
         }
     });
 };
