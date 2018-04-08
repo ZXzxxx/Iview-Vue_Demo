@@ -1,5 +1,5 @@
 <template>
-    <Cascader :data="data4" :load-data="loadData" placeholder="教研室-专业" style="width:200px"></Cascader>
+    <Cascader :data="data4" :load-data="loadData" placeholder="教研室-专业"  style="width:200px;display:inline-block" transfer></Cascader>
 </template>
 <script>
     export default {

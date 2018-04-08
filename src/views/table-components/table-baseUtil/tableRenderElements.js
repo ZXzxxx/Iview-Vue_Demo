@@ -39,7 +39,10 @@ const rowSelect = (vm, h, param, item) => {
         on: {
             'select-onChange' (value) {
                 let key = param.column.key;
-                vm.edittingStore[param.index][key] = value; //下拉框选中值变化时，当前选中的值也变化
+                if(vm.edittingStore[param.index].editting == true){ 
+                    vm.edittingStore[param.index][key] = value; //下拉框选中值变化时，当前选中的值也变化         
+                }
+
             },
         }
     });

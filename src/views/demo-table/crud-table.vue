@@ -24,16 +24,14 @@
                         :editIncell="true"
                         :all-select-urls="crud_selectUrls"
                         :columns-list="tableColumsList">  <!--传参数-->
-                                                                  <!--插槽，插入需要的Dom-->
-                        <span slot="table-title" style="color:#1290ca">XXX-查询</span>
-                        <span slot="search-content">
-                            <Input v-model="searchByName" @on-change="handleSearch" icon="search" placeholder="姓名..." style="width: 100px"/>
+                                                                  
+                        <!--插槽，插入需要的Dom-->
+                        <span slot="add-name">增添职员</span>
+                        <span slot="delete-name">批量删除</span>
+                        <span slot="search-slot">
+                            <Input v-model="searchByName" @on-change="handleSearch" icon="search" placeholder="姓名..." style="width:200px"/>
                             <year-picker></year-picker>
-                            <cascader></cascader>
-                            <!-- <table-select
-                                :select-list="empSelectList"
-                                :multipleState="true"
-                            ></table-select> -->
+                            <cascader></cascader><cascader style="margin-left:4px"></cascader>
                         </span>
                     </edit-table>
                 </div>

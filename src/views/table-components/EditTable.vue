@@ -13,20 +13,24 @@
                 <Icon type="grid"/>
                 XXX
             </p>
-            <!-- 查询的折叠面板 -->
-            <Collapse>
-                <Panel>
-                    <Icon type="search" color="#1290ca"/> 
-                    <slot name="table-title"></slot>  
-                    <p slot="content">
-                        <slot name="search-content"></slot>   <!--插入查询框框Dom--> 
-                    </p>                           
-                </Panel>
-            </Collapse>
+            <div style="margin:0px 10px;overflow: hidden">  <!--溢出部分隐藏-->
+                <Button icon='plus' type="primary" shape="circle" style="margin-right:15px;margin-left:10px"><slot name="add-name"/></Button>  <!--折叠框的杠杠处-->
+                <Button icon='minus' type="error" shape="circle" style="margin-right:15px"><slot name="delete-name"/></Button>  <!--折叠框的杠杠处-->
+                <Button icon='ios-search-strong' shape="circle" style="float:right;margin:3px 15px"><i-switch size="small" v-model="showSearch"/></Button>              
+            </div>
+            <div style="margin:0px 10px;overflow: hidden" v-if="showSearch">
+                <Card :bordered="false"> <!--无边框-->
+                    <div>
+                        <slot name="search-slot"></slot>
+                    </div>
+                </Card>
+            </div>
             <!--
-                    注意!!!    如果想自定义列的颜色的话，就不能用斑马线属性stripe [一行白一行灰的显示]
+                    注意!!!  如果想自定义列的颜色的话，就不能用斑马线属性stripe [一行白一行灰的显示]
             -->
-            <Table :ref="refName" :columns="columnsList" :data="thisTableData" size="small" stripe></Table>
+            <div style="margin:0px 10px;overflow: hidden">
+                <Table :ref="refName" :columns="columnsList" :data="thisTableData" size="small"></Table>
+            </div>
             <!--分页-->
             <div style="margin: 10px;overflow: hidden">
                 <div style="float: right;">
@@ -39,10 +43,12 @@
 </template>
 
 <script>
+
+
 //导入js文件
-import tableCellType from './table-baseUtil/tableCellComponents';
 import tableAxios from './table-baseUtil/tableAxios';
 import tableEles from './table-baseUtil/tableRenderElements';
+
 
 //暴露出来，外部才能找到
 export default {
@@ -60,6 +66,7 @@ export default {
     data () {  //data必须定义为函数形式，然后有返回值    : function（）==（）
         return { //以下定义的，是该组件 自己的数据
             // pageTotal: 0,
+            showSearch: false,
             thisTableData: [],   //表格--数据内容   在init()中初始化等于res的内容
             edittingStore: [],    //暂存修改数据  -- 作为一个中间变量
         };
@@ -171,8 +178,8 @@ export default {
                                         !currentRow.edittingCell[param.column.key] ? (item.cellType=="object") ? h('span', currentRow[item.key].value) : h('span', currentRow[item.key]) : tableEles(this, h, param, item)
                                     ]),
                                     h('Col', [  //编辑按钮
-                                        //true时，显示保存，false时显示编辑
-                                        currentRow.edittingCell[param.column.key] ? tableCellType.saveIncellEditBtn(this, h, param) : tableCellType.incellEditBtn(this, h, param)
+                                        //判断该列的编辑状态，为true时，显示保存按钮，false时显示编辑按钮
+                                        currentRow.edittingCell[param.column.key] ? tableAxios.saveIncellEditBtn(this, h, param) : tableAxios.incellEditBtn(this, h, param)
                                     ])
                                 ]);
                             }else{//不可以进行单列编辑的列
@@ -189,9 +196,9 @@ export default {
                         let children = [];
                         item.handle.forEach(item => {  //遍历handle里面的item
                             if (item == 'edit') {
-                                children.push(tableCellType.editButton(this, h, currentRowData, param.index));
+                                children.push(tableAxios.editButton(this, h, currentRowData, param.index));
                             } else {
-                                children.push(tableCellType.deleteButton(this, h, currentRowData, param.index));
+                                children.push(tableAxios.deleteButton(this, h, currentRowData, param.index));
                             }                            
                         });
                         return h('div', children);  //按钮组合形式显示
@@ -200,10 +207,6 @@ export default {
             });
         },
 
-        // //从后台获取表格数据
-        // initTableData() {
-
-        // },
 
         //处理成后台需要的数据√
         handleBackdata (data) {
@@ -234,6 +237,7 @@ export default {
     }
 };
 </script>
+
 
 
 
