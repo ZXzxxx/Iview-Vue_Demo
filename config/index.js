@@ -15,20 +15,20 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {    //后台配置在这里
-      // '/': {
-      //   target: 'http://localhost:8081',  //后台服务器地址
-      //   changeOrigin: true,
-      //   pathRewrite: {
-      //     '^/': ''
-      //   }
-      // }
+      '/': {
+        target: 'http://localhost:8081',  //后台服务器地址
+        changeOrigin: true,
+        pathRewrite: {
+          '^/': ''
+        }
+      }
     },
 
     //前台端口更改在这里
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
     port: 8090, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
-    autoOpenBrowser: false,
+    autoOpenBrowser: true,
     errorOverlay: true,
     notifyOnErrors: true,
     poll: false, // https://webpack.js.org/configuration/dev-server/#devserver-watchoptions-

@@ -14,8 +14,8 @@
                 XXX
             </p>
             <div style="margin:0px 10px;overflow: hidden">  <!--溢出部分隐藏-->
-                <Button icon='plus' type="primary" shape="circle" style="margin-right:15px;margin-left:10px"><slot name="add-name"/></Button>  <!--折叠框的杠杠处-->
-                <Button icon='minus' type="error" shape="circle" style="margin-right:15px"><slot name="delete-name"/></Button>  <!--折叠框的杠杠处-->
+                <Button icon='plus' type="primary" shape="circle" style="margin-right:15px;margin-left:10px" @click="handleAddOperation"><slot name="add-name"/></Button>  <!--折叠框的杠杠处-->
+                <Button icon='minus' type="error" shape="circle" style="margin-right:15px" @click="handleBatchDeletion"><slot name="delete-name"/></Button>  <!--折叠框的杠杠处-->
                 <Button icon='ios-search-strong' shape="circle" style="float:right;margin:3px 15px"><i-switch size="small" v-model="showSearch"/></Button>              
             </div>
             <div style="margin:0px 10px;overflow: hidden" v-if="showSearch">
@@ -29,7 +29,7 @@
                     注意!!!  如果想自定义列的颜色的话，就不能用斑马线属性stripe [一行白一行灰的显示]
             -->
             <div style="margin:0px 10px;overflow: hidden">
-                <Table :ref="refName" :columns="columnsList" :data="thisTableData" size="small"></Table>
+                <Table :ref="refName" :columns="columnsList" :data="thisTableData" size="small" @on-selection-change="handleSelectionsData"></Table>
             </div>
             <!--分页-->
             <div style="margin: 10px;overflow: hidden">
@@ -48,6 +48,7 @@
 //导入js文件
 import tableAxios from './table-baseUtil/tableAxios';
 import tableEles from './table-baseUtil/tableRenderElements';
+import index from 'vue';
 
 
 //暴露出来，外部才能找到
@@ -66,7 +67,9 @@ export default {
     data () {  //data必须定义为函数形式，然后有返回值    : function（）==（）
         return { //以下定义的，是该组件 自己的数据
             // pageTotal: 0,
-            showSearch: false,
+            selectionsData:[],  //多选选择的表格数据
+            addData: [],   //暂存新增的一行数据
+            showSearch: false,  //是否显示搜索卡片
             thisTableData: [],   //表格--数据内容   在init()中初始化等于res的内容
             edittingStore: [],    //暂存修改数据  -- 作为一个中间变量
         };
@@ -79,8 +82,9 @@ export default {
         this.init();
     },
     methods: {  //定义一些方法的 实现
-
-        init () { //初始化数据
+        
+        //初始化数据
+        init () { 
 
             //刚开始的thisTableData是空的
             
@@ -101,12 +105,22 @@ export default {
                     }                    
                 }           
             });
+
+            console.log(this.columnsList);
+
+            this.addData = this.columnsList.map((item, index) => {
+                if(this.columnsList[index].key){ //有key时才操作
+                    let keyName = this.columnsList[index].key; 
+                    console.log(item);
+                }
+                // this.$set(item,);
+            })
+
             //JSON.stringify()  从对象中解析出json字符串
             //JSON.parse()      将json字符串解析成对象
             let cloneData = JSON.parse(JSON.stringify(this.value)); //克隆一份表格数据
             
             let res = [];//定义了一个空数组， 添加关于可编辑列的新属性
-            
             //map():返回一个新的Array，每个元素为调用function的结果
             res = cloneData.map((item,index) => {
                 let isEditting = false;  //默认不处于编辑状态   初始化res数据，是从129行else开始的.
@@ -144,6 +158,7 @@ export default {
             });
 
             this.thisTableData = res;   //表格显示的数据 等于res
+            console.log(this.thisTableData);
             this.edittingStore = JSON.parse(JSON.stringify(this.thisTableData));
             
             //遍历可编辑列头，将可编辑列字段，在编辑状态[单列/行]下打开编辑框
@@ -152,9 +167,7 @@ export default {
                 //如果该表头列是可编辑的
                 if (item.editable) { 
                     item.render = (h,param)=>{
-                        console.log(param.index)
                         let currentRow = this.thisTableData[param.index]; //得到当前行数据
-
                         /*editting的值 是点击编辑按钮那 给定的*/
                         if(currentRow.editting){   //true的时候是整行编辑
                             return h('div',
@@ -197,7 +210,7 @@ export default {
                         item.handle.forEach(item => {  //遍历handle里面的item
                             if (item == 'edit') {
                                 children.push(tableAxios.editButton(this, h, currentRowData, param.index));
-                            } else {
+                            } else if (item == 'delete'){
                                 children.push(tableAxios.deleteButton(this, h, currentRowData, param.index));
                             }                            
                         });
@@ -206,12 +219,34 @@ export default {
                 }
             });
         },
-
-
-        //处理成后台需要的数据√
+        //处理表格多选获取的行数据
+        handleSelectionsData(selection) {
+            this.selectionsData = selection;
+            // alert(this.handleBackdata (selection)); //这是一个数组对象  
+            // console.log(this.handleBackdata (selection));
+        },
+        //添加新的一行数据. 因为添加的时候需要时打开状态。所以editting为true。表示当前是编辑框状态。
+        handleAddOperation() {
+            this.thisTableData.push({'editting':'true','edittingCell':{'name':'false','work':'false'},'name':'123','sex':'','work':{}});  
+            console.log("添加测试");
+            console.log(this.thisTableData);
+        },
+        //处理批量删除操作
+        handleBatchDeletion() {
+            if (this.selectionsData.length != 0) {  //选中要删除的行才进行删除操作
+                alert(this.selectionsData);
+            }else {  //提示选择要删除的行
+                this.$Message.warning({
+                    content: '请先选择要删除的行',
+                    duration: 20,  //至少 维持20秒.20秒不关. 自己关闭
+                    closable: true  //设为true这个框就可以自己关闭
+                });
+            }  
+        },
+        //数组处理----后台需要的数据√
         handleBackdata (data) {
             let clonedData = JSON.parse(JSON.stringify(data));  //获取到当前数据---object类型
-
+        
             clonedData.forEach(item => {  //遍历这些数据的item，删除每个item对应的以下三个属性               
                 delete item.editting;
                 delete item.edittingCell;
@@ -219,7 +254,16 @@ export default {
             });
             return clonedData; 
         },
+        //对象处理----后台需要的数据√
+        handleObjectDataToBackData (data) {
+            let objectData = JSON.parse(JSON.stringify(data));  //获取到当前数据---object类型
 
+            delete objectData.editting;
+            delete objectData.edittingCell;
+            delete objectData.saving;
+
+            return objectData; 
+        },        
         //分页处理事件××
         changePage () {
             // The simulated data is changed directly here, and the actual usage scenario should fetch the data from the server

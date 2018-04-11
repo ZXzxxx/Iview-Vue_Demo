@@ -12,7 +12,7 @@
       <Row>
           <!--行内的列,该列跨度是12-->
         <Col >
-                <!--表格高190px
+                <!--表格高190px 
                   -->
                 <div class="edittable-table-height-con">
                     <edit-table 
@@ -72,36 +72,25 @@ export default {
         };
     },
     methods: {
-        //获取数据
+        //初始化数据
         init () {
             this.tableColumsList = tableData.editInlineAndCellColumn; //表格表头
-            tableAxios.axiosGet('/static/tableTestData.json', this); //从后台获取表格数据
-            this.crud_selectUrls = {     //所有下拉框的url地址
-                'work' : '/static/departmentTestData.json',   //json这种要放在static里面
+            tableAxios.axiosGet('/getAllTeacher', this); //获取--后台
+            this.crud_selectUrls = {     //这个表格上涉及到的所有下拉框的url地址
+                'school' : '/getAllSchool',   
             };           
         },
-
-        // handleNetConnect (state) {
-        //     this.breakConnect = state;
-        // },
-        // handleLowSpeed (state) {
-        //     this.lowNetSpeed = state;
-        // },
-        // getCurrentData () {
-        //     this.showCurrentTableData = true;
-        // },
         handleDel (val, index) {
             this.$Message.success('删除了第' + (index + 1) + '行数据');
         },
         handleCellChange (val, index, key) {
             this.$Message.success('修改了第 ' + (index + 1) + ' 行列名为 ' + key + ' 的数据');
         },
-        //修改在这里后台交互
-        handleChange (val, index) {
-            this.$Message.success('修改的数据为' + val);
-            this.$Message.success('修改了第' + (index + 1) + '行数据');
+        //修改--后台
+        handleChange (currentVal) {
+            tableAxios.axiosPut('/updateTeacher', this, currentVal);
         },
-        //查询方法
+        //查询--前台
         search (data, argumentObj) {
             let res = data;
             let dataClone = data;

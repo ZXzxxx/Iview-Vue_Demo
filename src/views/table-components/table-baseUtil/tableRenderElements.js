@@ -50,7 +50,6 @@ const rowSelect = (vm, h, param, item) => {
 
 //Input框
 const rowInput = (vm, h, param, item) => {
-    console.log("henghengheng1");
     return h('Input', {
         props: {
             type: 'text',

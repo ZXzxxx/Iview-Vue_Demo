@@ -1,5 +1,6 @@
 import axios from 'axios';
-
+axios.defaults.headers.put['Content-Type'] = 'application/json;charset=UTF-8'; //全局定义axios字段
+axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
 //get
 const axiosGet = (url, componentVm) => {
     axios.get(url)
@@ -9,11 +10,43 @@ const axiosGet = (url, componentVm) => {
         } 
     })
     .catch(function(error){
-        alert(error);
+        this.$Message.error({
+            content: error,
+            duration: 20,  //至少 维持20秒.20秒不关. 自己关闭
+            closable: true  //设为true这个框就可以自己关闭
+        });
     }); 
 };
 //post
+// const axiosPost = () => {
+//     axios.post('/user', {
+//     firstName: 'Fred',
+//     lastName: 'Flintstone'
+//     })
+//     .then(function (response) {
+//     })
+//     .catch(function (error) {;
+//     });
+// }
 //put
+const axiosPut = (url, componentVm, currentVal) => {        //到时候要把表格数据再传进来一次
+    axios.put(url, currentVal)
+    .then(function (response) {
+        if(response.status === 200){
+            this.$Message.success({
+                content: '数据修改成功',
+                duration: 5,
+            });
+        } 
+    })
+    .catch(function (error) {
+        this.$Message.error({
+            content: error,
+            duration: 20,  //至少 维持20秒.20秒不关. 自己关闭
+            closable: true  //设为true这个框就可以自己关闭
+        });
+    });
+}
 //delete
 
 //获取下拉框的url
@@ -70,7 +103,7 @@ const editButton = (vm, h, currentRow, index) => {
 
                     vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore)); //???又来一遍
                     //父组件@on-change的时候，可以用这两个参数
-                    vm.$emit('on-change', vm.handleBackdata(vm.thisTableData), index);  
+                    vm.$emit('on-change', vm.handleObjectDataToBackData(edittingRow));  //应该由父组件做这件事  因为每个父组件传的url是不一样的
                     // vm.$emit('input', vm.handleBackdata(vm.thisTableData)); //???目前还没用到
     
                 }
@@ -103,8 +136,8 @@ const deleteButton = (vm, h, currentRow, index) => {
     
                         vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore)); //因位saving和editting变了
                         //父组件@on-change的时候，可以用这两个参数
-                        vm.$emit('on-change', vm.handleBackdata(vm.thisTableData), index);  
-                        vm.$emit('input', vm.handleBackdata(vm.thisTableData)); //处理成后台需要的数据
+                        // vm.$emit('on-change', vm.handleBackdata(vm.thisTableData), index);  
+                        // vm.$emit('input', vm.handleBackdata(vm.thisTableData)); //处理成后台需要的数据
                            
                 }
             }
@@ -191,6 +224,7 @@ const saveIncellEditBtn = (vm, h, param) => {
 
 const tableCRUDButton = {
     axiosGet: axiosGet,
+    axiosPut: axiosPut,
     selectUrl: selectUrl,
     editButton: editButton,
     deleteButton: deleteButton,
