@@ -87,7 +87,7 @@ const editButton = (vm, h, currentRow, index) => {
                     if (currentRow.edittingCell) { //如果该行有可编辑的列. 
                         for (let cellName in currentRow.edittingCell) {            
                             currentRow.edittingCell[cellName] = false;
-                            vm.edittingStore[index].edittingCell[cellName] = false;
+                            vm.thisTableData[index].edittingCell[cellName] = false;
                         }
                     }
                     vm.thisTableData[index].editting = true;  //点击编辑按钮之后，这行数据的编辑状态变为true 
@@ -96,7 +96,7 @@ const editButton = (vm, h, currentRow, index) => {
                                   
                     // vm.edittingStore[index].saving = true;  //点击保存按钮之后，这行数据的保存状态变为true
                     vm.edittingStore[index].editting = false;  //点击保存按钮之后, 这行数据的编辑状态变为false
-                    vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));//保存完成后的新的数据
+                    vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));//因为修改的数据保存在edittingStore里面呢,所以得重新赋值一下,然后才能得到当前最新数据,传给后台
           
                     let edittingRow = vm.thisTableData[index]; //当前正在编辑的该行的数据                                  
                     //父组件@on-change的时候，可以用这两个参数

@@ -17,7 +17,7 @@
                 <div class="edittable-table-height-con">
                     <edit-table 
                         refName = "crudTable" 
-                        v-model="tableDataList"
+                        v-model="tableDataList" 
                         @on-cell-change="handleCellChange"
                         @on-change="handleChange"
                         @on-delete="handleDel"

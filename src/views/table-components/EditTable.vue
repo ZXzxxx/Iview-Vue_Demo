@@ -29,7 +29,7 @@
                     注意!!!  如果想自定义列的颜色的话，就不能用斑马线属性stripe [一行白一行灰的显示]
             -->
             <div style="margin:0px 10px;overflow: hidden">
-                <Table :ref="refName" :columns="columnsList" :data="thisTableData" size="small" @on-selection-change="handleSelectionsData"></Table>
+                <Table :ref="refName" :columns="columnsList" :data="value" size="small" @on-selection-change="handleSelectionsData"></Table>
             </div>
             <!--分页-->
             <div style="margin: 10px;overflow: hidden">
@@ -56,7 +56,7 @@ export default {
     props: {//定义传进来的参数值的类型
         refName: String,  //组件指针名
         columnsList: Array,  //表格表头 [这个根据表格情况自定义写的]
-        value: Array, //表格上显示的数据内容 [从后台get到的]   就是父组件v-model双向绑定的值
+        value: Array, //表格上显示的数据内容 [从后台get到的]   就是父组件v-model双向绑定的值   这里必须是value才行
         editIncell: { //该列是否可以进行单列编辑的状态判断,默认false
             type: Boolean,
             default: false   
@@ -70,8 +70,8 @@ export default {
             selectionsData:[],  //多选选择的表格数据
             addData: [],   //暂存新增的一行数据
             showSearch: false,  //是否显示搜索卡片
-            thisTableData: [],   //表格--数据内容   在init()中初始化等于res的内容
-            edittingStore: [],    //暂存修改数据  -- 作为一个中间变量
+            thisTableData: [],   //添加了判断状态的属性
+            edittingStore: [],    //暂存修改的数据  -- 作为一个中间变量
         };
     },
     /**
@@ -97,12 +97,11 @@ export default {
             let vm = this; //vm 的值等于当前组件  因为这个方法里面有很多箭头函数或者匿名函数。所以先把this赋值好给vm。
 
             /**
-             * 1. 需要定义一个可编辑的表头列数组，编辑的时候遍历他们，打开他们的编辑框.
-             * 2. 需要定义一个临时的数组变量, 克隆value值, 因为value的值是从后台获取的，以防格式不标准, 先从对象中解析出json, 再将json解析成对象.
-             * 3. 需要定义一个临时的数组变量，对表格data数据初始化的时候，先直接对这个临时的数组变量操作，再把值赋值给表格data.
-             *      3.1 value的值就是从后台获取到的表格数据. 因为要进行CRUD操作, 所以需要给表格数据添加操作状态新属性，用来分辨当前数据的操作状态. 
-             *          在基层模板这, 给表格data绑定了一个新的变量, 用来存进行了实质操作的表格数据. 
-             *        
+             * 1. 定义一个可编辑的表头列数组，编辑的时候遍历他们，打开他们的编辑框.
+             * 2. 定义一个临时的数组变量, 克隆value值, 因为value的值是从后台获取的，以防格式不标准, 先从对象中解析出json, 再将json解析成对象.
+             * 3. value的值就是从后台获取到的表格数据. 因为要进行CRUD操作, 所以需要给表格数据添加操作状态新属性，用来分辨当前数据的操作状态. 
+             *    所以需要一个新的变量thisTableData来存这些东西,进行判断.
+             *      3.1 定义一个临时的数组变量，对表格data数据初始化的时候，对这个临时的数组变量操作，再把值赋值给thisTableData.    
              * 4.                
              */
 
@@ -117,8 +116,8 @@ export default {
 
             //JSON.stringify()  从对象中解析出json字符串
             //JSON.parse()      将json字符串解析成对象
-            let cloneValue = JSON.parse(JSON.stringify(this.value)); //克隆一份表格数据
-            
+            let cloneValue = JSON.parse(JSON.stringify(vm.value)); //克隆一份表格数据
+
             //定义一个新的数组变量，对克隆的表格数据通过map方法，添加操作状态新属性            
             let res = cloneValue.map((item,index) => {  //map():返回一个新的Array，每个元素为调用function的结果,是执行了这个function的结果值. 
                 let isEditting = false;   //当前表格的状态,是否打开编辑框进行编辑操作, 需要一个外部的状态判断.
