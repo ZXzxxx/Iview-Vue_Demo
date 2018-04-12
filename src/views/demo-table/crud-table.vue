@@ -18,7 +18,7 @@
                     <edit-table 
                         refName = "crudTable" 
                         v-model="tableDataList" 
-                        @on-cell-change="handleCellChange"
+                        @on-batch-delete="handleBatchDel"
                         @on-change="handleChange"
                         @on-delete="handleDel"
                         :editIncell="true"
@@ -26,8 +26,6 @@
                         :columns-list="tableColumsList">  <!--传参数-->
                                                                   
                         <!--插槽，插入需要的Dom-->
-                        <span slot="add-name">增添职员</span>
-                        <span slot="delete-name">批量删除</span>
                         <span slot="search-slot">
                             <Input v-model="searchByName" @on-change="handleSearch" icon="search" placeholder="姓名..." style="width:200px"/>
                             <year-picker></year-picker>
@@ -80,11 +78,13 @@ export default {
                 'school' : '/getAllSchool',   
             };           
         },
+        //批量删除--后台
+        handleBatchDel (deleteVals) {
+            tableAxios.axiosDelete('/deleteTeachers', this, deleteVals);
+        },        
+        //删除--后台
         handleDel (deleteVals) {
             tableAxios.axiosDelete('/deleteTeacher', this, deleteVals);
-        },
-        handleCellChange (val, index, key) {
-            this.$Message.success('修改了第 ' + (index + 1) + ' 行列名为 ' + key + ' 的数据');
         },
         //修改--后台
         handleChange (currentVal) {

@@ -14,8 +14,15 @@
                 XXX
             </p>
             <div style="margin:0px 10px;overflow: hidden">  <!--溢出部分隐藏-->
-                <Button icon='plus' type="primary" shape="circle" style="margin-right:15px;margin-left:10px" @click="handleAddOperation"><slot name="add-name"/></Button>  <!--折叠框的杠杠处-->
-                <Button icon='minus' type="error" shape="circle" style="margin-right:15px" @click="handleBatchDeletion"><slot name="delete-name"/></Button>  <!--折叠框的杠杠处-->
+                <Button icon='plus' type="primary" shape="circle" style="margin-right:15px;margin-left:10px" @click="handleAddOperation">增添数据</Button> 
+                <Poptip
+                    confirm
+                    title="确认删除这些数据吗?"
+                    placement="right-start"
+                    @on-ok="handleBatchDeletion"
+                >
+                    <Button icon='minus' type="error" shape="circle" style="margin-right:15px">批量删除</Button>  
+                </Poptip>
                 <Button icon='ios-search-strong' shape="circle" style="float:right;margin:3px 15px"><i-switch size="small" v-model="showSearch"/></Button>              
             </div>
             <div style="margin:0px 10px;overflow: hidden" v-if="showSearch">
@@ -222,9 +229,7 @@ export default {
         },
         //处理表格多选获取的行数据
         handleSelectionsData(selection) {
-            this.selectionsData = selection;
-            // alert(this.handleBackdata (selection)); //这是一个数组对象  
-            // console.log(this.handleBackdata (selection));
+            this.selectionsData = selection;  //获取到选中的数据
         },
         //添加新的一行数据. 因为添加的时候需要时打开状态。所以editting为true。表示当前是编辑框状态。
         handleAddOperation() {
@@ -235,7 +240,7 @@ export default {
         //处理批量删除操作
         handleBatchDeletion() {
             if (this.selectionsData.length != 0) {  //选中要删除的行才进行删除操作
-                alert(this.selectionsData);
+                this.$emit('on-batch-delete', this.selectionsData);
             }else {  //提示选择要删除的行
                 this.$Message.warning({
                     content: '请先选择要删除的行',
