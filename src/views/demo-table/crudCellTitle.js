@@ -38,7 +38,7 @@ export const editInlineAndCellColumn = [
         title: '操作',
         align: 'center',
         key: 'handle',  // 定义handle关键字
-        handle: ['edit', 'delete','add']
+        handle: ['edit', 'delete','add', 'cancel']
     }
 ];
 

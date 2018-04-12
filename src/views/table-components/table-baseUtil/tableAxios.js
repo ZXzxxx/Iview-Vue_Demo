@@ -1,6 +1,8 @@
 import axios from 'axios';
-axios.defaults.headers.put['Content-Type'] = 'application/json;charset=UTF-8'; //全局定义axios字段
+//全局定义axios字段
+axios.defaults.headers.put['Content-Type'] = 'application/json;charset=UTF-8'; 
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
+axios.defaults.headers.delete['Content-Type'] = 'application/json;charset=UTF-8';
 //get
 const axiosGet = (url, componentVm) => {
     axios.get(url)
@@ -18,36 +20,49 @@ const axiosGet = (url, componentVm) => {
     }); 
 };
 //post
-// const axiosPost = () => {
-//     axios.post('/user', {
-//     firstName: 'Fred',
-//     lastName: 'Flintstone'
-//     })
-//     .then(function (response) {
-//     })
-//     .catch(function (error) {;
-//     });
-// }
 //put
-const axiosPut = (url, componentVm, currentVal) => {        //到时候要把表格数据再传进来一次
+const axiosPut = (url, componentVm, currentVal) => {     
     axios.put(url, currentVal)
     .then(function (response) {
         if(response.status === 200){
-            this.$Message.success({
+            componentVm.tableDataList  = componentVm.initTableData = response.data;
+            componentVm.$Message.success({
                 content: '数据修改成功',
                 duration: 5,
             });
         } 
     })
     .catch(function (error) {
-        this.$Message.error({
+        componentVm.$Message.error({
             content: error,
             duration: 20,  //至少 维持20秒.20秒不关. 自己关闭
             closable: true  //设为true这个框就可以自己关闭
         });
     });
 }
-//delete
+//delete   delete和put post不一样,注意一下
+const axiosDelete = (url, componentVm, deleteVals) => {        //到时候要把表格数据再传进来一次
+    axios.delete(url,{
+         data: deleteVals    
+    }
+    )
+    .then(function (response) {
+        if(response.status === 200){
+            componentVm.tableDataList  = componentVm.initTableData = response.data;
+            componentVm.$Message.success({
+                content: '数据删除成功',
+                duration: 5,
+            });
+        } 
+    })
+    .catch(function (error) {
+        componentVm.$Message.error({
+            content: error,
+            duration: 20,  //至少 维持20秒.20秒不关. 自己关闭
+            closable: true  //设为true这个框就可以自己关闭
+        });
+    });
+}
 
 //获取下拉框的url
 const selectUrl = (vm, selectName) => {
@@ -55,66 +70,47 @@ const selectUrl = (vm, selectName) => {
     return url; 
 };
 
-//行编辑/保存按钮
+//行--编辑/保存按钮
 const editButton = (vm, h, currentRow, index) => {
     return h('Button', {
         props: {
             type: 'primary',
             size: 'small',
-            icon: currentRow.editting ? 'checkmark' : 'ios-compose'
+            icon: currentRow.editting ? 'checkmark' : 'ios-compose'  //平时状态是编辑按钮。编辑状态变成保存按钮
         },
         style: {
             margin: '0 2px'
         },
         on: {
-            'click': () => {  //这是点击引发的事件
-                //点击编辑按钮前，这个editting是false状态；点击了之后，才变成了true
-                if (!currentRow.editting) {  //点击编辑按钮，进这里  进入编辑状态  editting为false的时候,显示的是编辑按钮
-                    console.log("进入了编辑状态");
-                    console.log(currentRow.editting);      
-
-                    if (currentRow.edittingCell) { //可编辑的列 
-                        //现在是行编辑状态,所以要把单个的列编辑状态设为false
+            'click': () => {  //这是点击引发的事件. editting为true时框框打开编辑中,为false时,编辑结束.关闭了框框.
+                if (!currentRow.editting) {  //editting为false的时候,显示的是编辑按钮.此时是没有打开框框的.也就是说这是点击编辑按钮引发的事件
+                    if (currentRow.edittingCell) { //如果该行有可编辑的列. 
                         for (let cellName in currentRow.edittingCell) {            
                             currentRow.edittingCell[cellName] = false;
                             vm.edittingStore[index].edittingCell[cellName] = false;
                         }
                     }
-                    vm.edittingStore[index].editting = true;  //现在是编辑状态
-                    vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));  //当前数据???这里为什么要有
-                    //点击保存按钮前，这个editting是true状态，点击了之后，才变成了false
-                } else {   //点击保存按钮，进这里  进入完成编辑的状态
-                    console.log("测试点击保存editting?");
-                    console.log(currentRow.editting);
-
-                    vm.edittingStore[index].saving = true;  //点击保存按钮之后，这行数据的保存状态才是true
-                    vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));//编辑完成后的新的数据
-                    
-                    console.log("测试这个时候的table数据?");
-                    console.log(vm.thisTableData);
-
-                    let edittingRow = vm.edittingStore[index]; //当前正在编辑的该行的数据
-                    
-                    console.log("测试这个时候的行数据?");
-                    console.log(edittingRow);
-
-                    edittingRow.editting = false;//编辑状态结束
-                    edittingRow.saving = false;//保存状态也结束
-
-                    vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore)); //???又来一遍
+                    vm.thisTableData[index].editting = true;  //点击编辑按钮之后，这行数据的编辑状态变为true 
+                    // vm.thisTableData[index].saving = false;  //点击编辑按钮之后，这行数据的保存状态变为false                    
+                } else {  //editting为true的时候,显示的是保存按钮. 此时打开了框框.也就是说这是点击保存按钮引发的事件  
+                                  
+                    // vm.edittingStore[index].saving = true;  //点击保存按钮之后，这行数据的保存状态变为true
+                    vm.edittingStore[index].editting = false;  //点击保存按钮之后, 这行数据的编辑状态变为false
+                    vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));//保存完成后的新的数据
+          
+                    let edittingRow = vm.thisTableData[index]; //当前正在编辑的该行的数据                                  
                     //父组件@on-change的时候，可以用这两个参数
                     vm.$emit('on-change', vm.handleObjectDataToBackData(edittingRow));  //应该由父组件做这件事  因为每个父组件传的url是不一样的
                     // vm.$emit('input', vm.handleBackdata(vm.thisTableData)); //???目前还没用到
-    
                 }
             }
         }
     });
 };
 
-//行删除按钮
+//行--删除/取消按钮
 const deleteButton = (vm, h, currentRow, index) => {
-    if (currentRow.editting){
+    if (currentRow.editting){  //editting为true的时候,显示的是取消按钮. 此时打开了框框.
         return h('Button', {
             props: {
                 type: 'warning',
@@ -125,20 +121,9 @@ const deleteButton = (vm, h, currentRow, index) => {
                 margin: '0 2px'
             },
             on: {
-                'click': () => {  //这是点击引发的事件
-                        vm.edittingStore[index].saving = true;  //点击取消按钮之后，这行数据的保存状态才是true
-                        vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));//编辑完成后的新的数据
-
-                        let edittingRow = vm.edittingStore[index]; //当前正在编辑的该行的数据
-    
-                        edittingRow.editting = false;//编辑状态结束
-                        edittingRow.saving = false;//保存状态也结束
-    
-                        vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore)); //因位saving和editting变了
-                        //父组件@on-change的时候，可以用这两个参数
-                        // vm.$emit('on-change', vm.handleBackdata(vm.thisTableData), index);  
-                        // vm.$emit('input', vm.handleBackdata(vm.thisTableData)); //处理成后台需要的数据
-                           
+                'click': () => {  //这是点击编辑的取消按钮引发的事件
+                    vm.thisTableData[index].saving = false;  //点击取消按钮之后，这行数据的保存状态才是true
+                    vm.thisTableData[index].editting = false;  //点击取消按钮之后，这行数据的保存状态才是false                 
                 }
             }
         });
@@ -151,8 +136,8 @@ const deleteButton = (vm, h, currentRow, index) => {
             },
             on: {  //点击ok触发删除
                 'on-ok': () => {
-                    vm.thisTableData.splice(index, 1).splice(index, 1);//从该数组中删除下标为index的数据，1表示只删除一条
-                    vm.$emit('on-delete', vm.handleBackdata(vm.thisTableData), index);
+                    let deleteRow = vm.thisTableData[index]; //当前正在编辑的该行的数据
+                    vm.$emit('on-delete', vm.handleObjectDataToBackData(deleteRow));
                 }
             }
         }, [
@@ -181,8 +166,8 @@ const incellEditBtn = (vm, h, param) => {
         },
         on: {
             click: (event) => {
-                vm.edittingStore[param.index].edittingCell[param.column.key] = true;
-                vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));
+                vm.thisTableData[param.index].edittingCell[param.column.key] = true; 
+                vm.thisTableData[param.index].saving = false;  
             }
         }
     });
@@ -199,13 +184,14 @@ const saveIncellEditBtn = (vm, h, param) => {
         on: {
             'on-ok': () => {
                 vm.edittingStore[param.index].edittingCell[param.column.key] = false;
+                vm.edittingStore[param.index].saving = true;  
                 vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));
-                // vm.$emit('input', vm.handleBackdata(vm.thisTableData));
-                // vm.$emit('on-cell-change', vm.handleBackdata(vm.thisTableData), param.index, param.column.key);
+                let edittingRow = vm.edittingStore[param.index]; 
+                vm.$emit('on-change', vm.handleObjectDataToBackData(edittingRow));
             },
             'on-cancel' : ()=>{
-                vm.edittingStore[param.index].edittingCell[param.column.key] = false;
-                vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));
+                vm.thisTableData[param.index].edittingCell[param.column.key] = false;
+                vm.thisTableData[param.index].saving = false;  
             }
         }
     },[
@@ -225,6 +211,7 @@ const saveIncellEditBtn = (vm, h, param) => {
 const tableCRUDButton = {
     axiosGet: axiosGet,
     axiosPut: axiosPut,
+    axiosDelete: axiosDelete,
     selectUrl: selectUrl,
     editButton: editButton,
     deleteButton: deleteButton,

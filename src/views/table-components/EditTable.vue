@@ -94,89 +94,81 @@ export default {
                 使用const声明的是常量，在后面出现的代码中不能再修改该常量的值。
              */
 
-            let vm = this; //vm 的值等于当前组件  只在init()里面起作用
+            let vm = this; //vm 的值等于当前组件  因为这个方法里面有很多箭头函数或者匿名函数。所以先把this赋值好给vm。
 
-            //filter():返回一个符合function条件的元素数组
-            //editableCell---可编辑的表头列
-            let editableCell = this.columnsList.filter(item => {   //item是columnsList[表格表头]里的每一个对象
-                if (item.editable) {
-                    if(item.editable == true){
+            /**
+             * 1. 需要定义一个可编辑的表头列数组，编辑的时候遍历他们，打开他们的编辑框.
+             * 2. 需要定义一个临时的数组变量, 克隆value值, 因为value的值是从后台获取的，以防格式不标准, 先从对象中解析出json, 再将json解析成对象.
+             * 3. 需要定义一个临时的数组变量，对表格data数据初始化的时候，先直接对这个临时的数组变量操作，再把值赋值给表格data.
+             *      3.1 value的值就是从后台获取到的表格数据. 因为要进行CRUD操作, 所以需要给表格数据添加操作状态新属性，用来分辨当前数据的操作状态. 
+             *          在基层模板这, 给表格data绑定了一个新的变量, 用来存进行了实质操作的表格数据. 
+             *        
+             * 4.                
+             */
+
+            //可编辑的表头列
+            let editableCell = this.columnsList.filter(item => {   //item是columnsList[表格表头]里的每一个对象,filter():返回一个符合function条件的item元素数组
+                if (item.editable) { //判断是否有editable这个属性段
+                    if(item.editable == true){ //该属性段值为true表示是可编辑的.
                         return item;
                     }                    
                 }           
             });
 
-            console.log(this.columnsList);
-
-            this.addData = this.columnsList.map((item, index) => {
-                if(this.columnsList[index].key){ //有key时才操作
-                    let keyName = this.columnsList[index].key; 
-                    console.log(item);
-                }
-                // this.$set(item,);
-            })
-
             //JSON.stringify()  从对象中解析出json字符串
             //JSON.parse()      将json字符串解析成对象
-            let cloneData = JSON.parse(JSON.stringify(this.value)); //克隆一份表格数据
+            let cloneValue = JSON.parse(JSON.stringify(this.value)); //克隆一份表格数据
             
-            let res = [];//定义了一个空数组， 添加关于可编辑列的新属性
-            //map():返回一个新的Array，每个元素为调用function的结果
-            res = cloneData.map((item,index) => {
-                let isEditting = false;  //默认不处于编辑状态   初始化res数据，是从129行else开始的.
-                /**
-                 * 箭头函数里面的this不是该箭头函数，箭头函数本身是没有this的
-                 * 这个this指的是这个组件对象，也就是定义的这个箭头函数所在的对象
-                 */
-                if (this.thisTableData[index]) {  //单列编辑的时候触发 ××
-                    console.log("进这里1");
-                    console.log(this.thisTableData)
-                    if (this.thisTableData[index].editting) { //true---正在编辑状态
-                        isEditting = true;
-                    } else { //不是正在编辑状态
-                        //for循环 遍历可编辑的列这个object属性
-                        for (const cell in this.thisTableData[index].edittingCell){ 
-                            if(this.thisTableData[index].edittingCell[cell] == true){ 
-                                isEditting = true;
+            //定义一个新的数组变量，对克隆的表格数据通过map方法，添加操作状态新属性            
+            let res = cloneValue.map((item,index) => {  //map():返回一个新的Array，每个元素为调用function的结果,是执行了这个function的结果值. 
+                let isEditting = false;   //当前表格的状态,是否打开编辑框进行编辑操作, 需要一个外部的状态判断.
+                let isAdding = false;  //????
+                if (vm.thisTableData[index]) {  //如果此时表格data已经有数据了,也就是说明已经进行过初始化了,所以现在的表格data是有新定义的状态属性的.
+                    if (vm.thisTableData[index].editting) { //如果这一行的editting是true, 表示这一行正处于编辑状态.
+                        isEditting = true;  //编辑状态true
+                    } else { //如果这一行没有正在处于编辑状态, 就可以进行列编辑操作.
+                        for (const cell in vm.thisTableData[index].edittingCell){ 
+                            if(vm.thisTableData[index].edittingCell[cell] == true){  //如果这一列的编辑状态是true, 表示这一列正处于编辑状态
+                                isEditting = true;  //编辑状态true
                             }
                         }  
                     }                   
                 }
-                if (isEditting) {  //单列编辑的时候触发,还没测试出进这里  ××
-                    console.log("进这里2");
-                    return this.thisTableData[index]; 
-                }else{  //isEditting为false时  即 初次初始化res
-                    this.$set(item, 'editting', false);  //添加新属性  editting, ，默认值false
-                    let edittingCell = {};  //对象
-                    //遍历可编辑的表头列的集合
+                /**
+                 * 需要进行if else判断,因为外部状态判断变化后,说明表格data内容变化了.
+                 */
+                //此时表格data已经不是空了,因为isEditting变成true了.
+                if (isEditting) {  
+                    return this.thisTableData[index]; //返回更新后的该行的表格data
+                }else{  //此时表格data还是空的. 
+                    this.$set(item, 'editting', false);  //给当前item项添加新属性,editting,表示当前行的编辑状态
+                    this.$set(item, 'saving', true);    //saving,表示当前行的保存状态
+                    let edittingCell = {};  
                     editableCell.forEach(item => {
-                        edittingCell[item.key] = false //item.key，即editableCell中每个对象的key值作为edittingCell的属性名，默认属性值为false
+                        edittingCell[item.key] = false //editableCell中每个item的key值作为edittingCell的属性名,表示当前列的编辑状态
                     });
-                    this.$set(item, 'edittingCell', edittingCell);  //添加新属性  edittingCell, 是个对象
-                    return item;  //得到初次初始化后的res  每个item对象除了添加的新属性外，cloneData的原属性依旧存在
+                    this.$set(item, 'edittingCell', edittingCell);  
+                    return item;  //返回初次初始化的该行的表格data
                 }
             });
 
-            this.thisTableData = res;   //表格显示的数据 等于res
-            console.log(this.thisTableData);
+            vm.thisTableData = res;   //将过滤好的表格data赋值
             this.edittingStore = JSON.parse(JSON.stringify(this.thisTableData));
             
-            //遍历可编辑列头，将可编辑列字段，在编辑状态[单列/行]下打开编辑框
+            //遍历表头, 不能只遍历可编辑的表头, 因为对不可编辑列也有相应的操作进行. 将可编辑的表头列打开为编辑框
             this.columnsList.forEach(item => {
 
-                //如果该表头列是可编辑的
-                if (item.editable) { 
-                    item.render = (h,param)=>{
+                if (item.editable) { //如果该表头列是可编辑的.  item是{title: '姓名',align: 'center',key: 'name', editable: true}这个东西  
+                    item.render = (h,param)=>{  //渲染该item
                         let currentRow = this.thisTableData[param.index]; //得到当前行数据
-                        /*editting的值 是点击编辑按钮那 给定的*/
-                        if(currentRow.editting){   //true的时候是整行编辑
+                        if(currentRow.editting){ //进行的是整行编辑
                             return h('div',
                                 [
                                     tableEles(this, h, param, item)
                                 ]
                             );
-                        }else {  //false的时候是单列编辑
-                            if(this.editIncell) {//可以进行单列编辑的列
+                        }else {//可进行单列编辑
+                            if(this.editIncell) {//有进行单列编辑的列
                                 //可编辑数据和编辑按钮都在这渲染
                                 return h('Row', { //行
                                     attrs: {
@@ -184,7 +176,7 @@ export default {
                                         align: 'middle',//文字居中
                                         justify: 'center',//内容居中  这样内容才和列对齐
                                     }
-                                }, [  //Row里面再包含的元素
+                                }, [//Row里面再包含的元素
                                     h('Col', [  //数据列
                                         //Col里面的元素内容
                                         //单列打开， true时编辑框状态，false时span状态    
@@ -195,7 +187,7 @@ export default {
                                         currentRow.edittingCell[param.column.key] ? tableAxios.saveIncellEditBtn(this, h, param) : tableAxios.incellEditBtn(this, h, param)
                                     ])
                                 ]);
-                            }else{//不可以进行单列编辑的列
+                            }else{//没有进行单列编辑的列
                                 return (item.cellType=="object") ? h('span', currentRow[item.key].value) : h('span', currentRow[item.key]);  //只显示着数据，不显示编辑按钮
                             }
                         }
@@ -205,16 +197,26 @@ export default {
                 //如果该item有handle这一项
                 if (item.handle) {  
                     item.render = (h, param) => {
-                        let currentRowData = this.thisTableData[param.index];
-                        let children = [];
-                        item.handle.forEach(item => {  //遍历handle里面的item
-                            if (item == 'edit') {
-                                children.push(tableAxios.editButton(this, h, currentRowData, param.index));
-                            } else if (item == 'delete'){
-                                children.push(tableAxios.deleteButton(this, h, currentRowData, param.index));
-                            }                            
+                        let currentRowData = this.thisTableData[param.index]; 
+                        let editAndDelete = []; //来放编辑和删除按钮的数组
+                        let addAndCancel = [];  //来放保存和取消按钮的数组
+                        item.handle.forEach(item => {  //遍历表头handle这一item里面的item
+                            switch (item) {
+                                case 'edit':
+                                    editAndDelete.push(tableAxios.editButton(this, h, currentRowData, param.index));
+                                    break;
+                                case 'delete':
+                                    editAndDelete.push(tableAxios.deleteButton(this, h, currentRowData, param.index));
+                                    break;
+                                case 'add':
+                                    // addAndCancel.push(tableAxios.editButton(this, h, currentRowData, param.index));
+                                    break;
+                                case 'cancel':
+                                    // addAndCancel.push(tableAxios.deleteButton(this, h, currentRowData, param.index));
+                                    break;
+                            }                           
                         });
-                        return h('div', children);  //按钮组合形式显示
+                        return h('div', editAndDelete);  //按钮组合形式显示
                     };
                 }
             });

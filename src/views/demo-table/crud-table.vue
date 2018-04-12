@@ -80,8 +80,8 @@ export default {
                 'school' : '/getAllSchool',   
             };           
         },
-        handleDel (val, index) {
-            this.$Message.success('删除了第' + (index + 1) + '行数据');
+        handleDel (deleteVals) {
+            tableAxios.axiosDelete('/deleteTeacher', this, deleteVals);
         },
         handleCellChange (val, index, key) {
             this.$Message.success('修改了第 ' + (index + 1) + ' 行列名为 ' + key + ' 的数据');
