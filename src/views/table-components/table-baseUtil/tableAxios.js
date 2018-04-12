@@ -9,7 +9,9 @@ const axiosGet = (url, componentVm) => {
     .then(function(response){  
         if(response.status === 200){
             componentVm.tableDataList  = componentVm.initTableData = response.data;
-        } 
+        }else{
+            componentVm.$Message.error("数据显示失败");
+        }
     })
     .catch(function(error){
         this.$Message.error({
@@ -30,6 +32,8 @@ const axiosPut = (url, componentVm, currentVal) => {
                 content: '数据修改成功',
                 duration: 5,
             });
+        }else{
+            componentVm.$Message.error("数据修改失败");
         } 
     })
     .catch(function (error) {
@@ -53,6 +57,8 @@ const axiosDelete = (url, componentVm, deleteVals) => {        //到时候要把
                 content: '数据删除成功',
                 duration: 5,
             });
+        }else{
+            componentVm.$Message.error("数据删除失败");
         } 
     })
     .catch(function (error) {
