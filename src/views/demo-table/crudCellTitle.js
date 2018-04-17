@@ -10,9 +10,16 @@ export const editInlineAndCellColumn = [
         align: 'center' //字体居中
     },
     {
-        title: 'ID',
+        width: '0px',
         align: 'center',
         key: 'id',
+        render: (h, params) => {
+            return h('div', {
+                    style: {
+                       display: false 
+                    }
+                });
+        }
     },
     {
         title: '姓名',
@@ -27,18 +34,18 @@ export const editInlineAndCellColumn = [
         editable: true,  //可编辑
         sortable: true,  //可排序
     },
-    // {
-    //     title: '教研室',
-    //     align: 'center',
-    //     key: 'school',
-    //     editable: true,
-    //     cellType: 'object',
-    // },
+    {
+        title: '教研室',
+        align: 'center',
+        key: 'school',
+        editable: true,
+        cellType: 'object',
+    },
     {
         title: '操作',
         align: 'center',
         key: 'handle',  // 定义handle关键字
-        handle: ['edit', 'delete','add', 'cancel']
+        handle: ['edit', 'delete']
     }
 ];
 

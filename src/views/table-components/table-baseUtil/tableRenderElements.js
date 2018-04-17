@@ -30,16 +30,14 @@ const rowSelect = (vm, h, param, item) => {
     return h(tableSelect, {
         props: {
             multipleState: false, //单选
-            selectUrl: vm.allSelectUrls[item.key]    //下拉框URL                 
+            selectUrl: vm.allSelectUrls[item.key],   //下拉框URL   
+            getValue:  vm.value[param.index][item.key],   //绑定值
         },
-        // domProps: {
-        //     value:'haha', //双向绑定的value要写在domProps里面
-        // },
         on: {
             'select-onChange' (value) {
                 let key = param.column.key;
-                vm.edittingStore[param.index][key] = value; //下拉框选中值变化时，当前选中的值也变化         
-            },
+                vm.edittingStore[param.index][key] = value;        
+            }
         }
     });
 };
@@ -49,7 +47,7 @@ const rowInput = (vm, h, param, item) => {
     return h('Input', {
         props: {
             type: 'text',
-            value: vm.thisTableData[param.index][item.key] //框里要显示着值
+            value: vm.value[param.index][item.key] //框里要显示着值
         },
         attrs: {
             placeholder: "不可为空..",
@@ -57,7 +55,7 @@ const rowInput = (vm, h, param, item) => {
         on: {
             'on-change' (event) {
                 let key = param.column.key; 
-                vm.edittingStore[param.index][key] = event.target.value;                    
+                vm.edittingStore[param.index][key] = event.target.value;                   
             }
         }
     });   

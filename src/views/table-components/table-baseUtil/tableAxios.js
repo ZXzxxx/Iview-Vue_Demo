@@ -8,7 +8,8 @@ const axiosGet = (url, componentVm) => {
     axios.get(url)
     .then(function(response){  
         if(response.status === 200){
-            componentVm.tableDataList  = componentVm.initTableData = response.data;
+            componentVm.tableDataList = response.data.rows;
+            componentVm.pageTotals = response.data.total;
         }else{
             componentVm.$Message.error("数据显示失败");
         }
@@ -27,7 +28,8 @@ const axiosPut = (url, componentVm, currentVal) => {
     axios.put(url, currentVal)
     .then(function (response) {
         if(response.status === 200){
-            componentVm.tableDataList  = componentVm.initTableData = response.data;
+            componentVm.tableDataList = response.data.rows;
+            componentVm.pageTotals = response.data.total;
             componentVm.$Message.success({
                 content: '数据修改成功',
                 duration: 5,
@@ -52,7 +54,8 @@ const axiosDelete = (url, componentVm, deleteVals) => {        //到时候要把
     )
     .then(function (response) {
         if(response.status === 200){
-            componentVm.tableDataList  = componentVm.initTableData = response.data;
+            componentVm.tableDataList = response.data.rows;
+            componentVm.pageTotals = response.data.total;
             componentVm.$Message.success({
                 content: '数据删除成功',
                 duration: 5,
@@ -96,18 +99,24 @@ const editButton = (vm, h, currentRow, index) => {
                             vm.thisTableData[index].edittingCell[cellName] = false;
                         }
                     }
-                    vm.thisTableData[index].editting = true;  //点击编辑按钮之后，这行数据的编辑状态变为true 
-                    // vm.thisTableData[index].saving = false;  //点击编辑按钮之后，这行数据的保存状态变为false                    
+                    vm.thisTableData[index].editting = true;  //点击编辑按钮之后，这行数据的编辑状态变为true                    
                 } else {  //editting为true的时候,显示的是保存按钮. 此时打开了框框.也就是说这是点击保存按钮引发的事件  
-                                  
-                    // vm.edittingStore[index].saving = true;  //点击保存按钮之后，这行数据的保存状态变为true
-                    vm.edittingStore[index].editting = false;  //点击保存按钮之后, 这行数据的编辑状态变为false
-                    vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));//因为修改的数据保存在edittingStore里面呢,所以得重新赋值一下,然后才能得到当前最新数据,传给后台
-          
-                    let edittingRow = vm.thisTableData[index]; //当前正在编辑的该行的数据                                  
-                    //父组件@on-change的时候，可以用这两个参数
-                    vm.$emit('on-change', vm.handleObjectDataToBackData(edittingRow));  //应该由父组件做这件事  因为每个父组件传的url是不一样的
-                    // vm.$emit('input', vm.handleBackdata(vm.thisTableData)); //???目前还没用到
+                    if (currentRow.adding) {      
+                        delete vm.thisTableData[0].adding; //删掉adding属性                         
+                        vm.edittingStore[index].editting = false;  //点击保存按钮之后, 这行数据的编辑状态变为false
+                        vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));//因为修改的数据保存在edittingStore里面呢,所以得重新赋值一下,然后才能得到当前最新数据,传给后台
+                        let edittingRow = vm.thisTableData[index]; //当前正在编辑的该行的数据                                  
+                        //父组件@on-change的时候，可以用这两个参数
+                        vm.$emit('on-change', vm.handleObjectDataToBackData(edittingRow));  //应该由父组件做这件事  因为每个父组件传的url是不一样的
+                    }else {                                 
+                        // vm.edittingStore[index].saving = true;  //点击保存按钮之后，这行数据的保存状态变为true
+                        vm.edittingStore[index].editting = false;  //点击保存按钮之后, 这行数据的编辑状态变为false
+                        vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));//因为修改的数据保存在edittingStore里面呢,所以得重新赋值一下,然后才能得到当前最新数据,传给后台
+            
+                        let edittingRow = vm.thisTableData[index]; //当前正在编辑的该行的数据                                  
+                        //父组件@on-change的时候，可以用这两个参数
+                        vm.$emit('on-change', vm.handleObjectDataToBackData(edittingRow));  //应该由父组件做这件事  因为每个父组件传的url是不一样的
+                    }
                 }
             }
         }
@@ -127,9 +136,13 @@ const deleteButton = (vm, h, currentRow, index) => {
                 margin: '0 2px'
             },
             on: {
-                'click': () => {  //这是点击编辑的取消按钮引发的事件
-                    vm.thisTableData[index].saving = false;  //点击取消按钮之后，这行数据的保存状态才是true
-                    vm.thisTableData[index].editting = false;  //点击取消按钮之后，这行数据的保存状态才是false                 
+                'click': () => {  //这是点击编辑的取消按钮引发的事件                    
+                    if (currentRow.adding) {
+                        vm.value.splice(0, 1);
+                        vm.thisTableData.splice(0, 1); //移除
+                    }else {
+                        vm.thisTableData[index].editting = false;  //点击取消按钮之后，这行数据的保存状态才是false                                 
+                    }                 
                 }
             }
         });
@@ -173,7 +186,7 @@ const incellEditBtn = (vm, h, param) => {
         on: {
             click: (event) => {
                 vm.thisTableData[param.index].edittingCell[param.column.key] = true; 
-                vm.thisTableData[param.index].saving = false;  
+                // vm.thisTableData[param.index].saving = false;  
             }
         }
     });
@@ -190,14 +203,14 @@ const saveIncellEditBtn = (vm, h, param) => {
         on: {
             'on-ok': () => {
                 vm.edittingStore[param.index].edittingCell[param.column.key] = false;
-                vm.edittingStore[param.index].saving = true;  
+                // vm.edittingStore[param.index].saving = true;  
                 vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));
                 let edittingRow = vm.edittingStore[param.index]; 
                 vm.$emit('on-change', vm.handleObjectDataToBackData(edittingRow));
             },
             'on-cancel' : ()=>{
                 vm.thisTableData[param.index].edittingCell[param.column.key] = false;
-                vm.thisTableData[param.index].saving = false;  
+                // vm.thisTableData[param.index].saving = false;  
             }
         }
     },[

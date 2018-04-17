@@ -7,11 +7,7 @@
 
 <!--组件模板-->
 <template>
-  <div>
-      <!--行-->
-      <Row>
-          <!--行内的列,该列跨度是12-->
-        <Col >
+  <div style="position: absolute;overflow:auto;height:100%;width:100%;">  <!--注意style-->
                 <!--表格高190px 
                   -->
                 <div class="edittable-table-height-con">
@@ -23,19 +19,19 @@
                         @on-delete="handleDel"
                         :editIncell="true"
                         :all-select-urls="crud_selectUrls"
-                        :columns-list="tableColumsList">  <!--传参数-->
+                        :columns-list="tableColumsList"
+                        :page-total="pageTotals"
+                        @handlePage="handlePage"
+                        @handlePageSize="handlePageSize"                       
+                        >  <!--传参数-->
                                                                   
                         <!--插槽，插入需要的Dom-->
                         <span slot="search-slot">
-                            <Input v-model="searchByName" @on-change="handleSearch" icon="search" placeholder="姓名..." style="width:200px"/>
-                            <year-picker></year-picker>
-                            <cascader></cascader><cascader style="margin-left:4px"></cascader>
+                            <Input v-model="searchByName"  @on-change="handleSearch" icon="search" placeholder="姓名..." style="width:130px"/>
+                            <table-select :selectUrl="'/getAllSchool'" :multipleState="true" :placeholderValue="'教研室...'" style="width:130px" @select-onChange="handleSearchBySelect"></table-select>
                         </span>
                     </edit-table>
                 </div>
-        </Col>
-    </Row>
-
   </div>
 </template>
 
@@ -62,53 +58,59 @@ export default {
     },
     data () {
         return {
-            searchByName: '',//搜索data
+            searchByName: '',
+            searchBySchoolSelect: '',
             tableColumsList: [],//表格列
-            tableDataList: [],  //表格具体数据
-            initTableData: [], //初始化数据      
+            tableDataList: [],  //表格具体数据   
             crud_selectUrls: {}, //下拉框URL
+            pageNum: 1, //当前的页数， 不能是0
+            pageSize: 10, //当前显示的数据条数
+            pageTotals:0,//总条数
         };
     },
     methods: {
         //初始化数据
         init () {
             this.tableColumsList = tableData.editInlineAndCellColumn; //表格表头
-            tableAxios.axiosGet('/getAllTeacher', this); //获取--后台
+            tableAxios.axiosGet('/getAllTeacher?' + "pageNum=" + this.pageNum + "&pageSize=" + this.pageSize, this); //获取--后台
             this.crud_selectUrls = {     //这个表格上涉及到的所有下拉框的url地址
                 'school' : '/getAllSchool',   
             };           
         },
-        //批量删除--后台
-        handleBatchDel (deleteVals) {
-            tableAxios.axiosDelete('/deleteTeachers', this, deleteVals);
-        },        
-        //删除--后台
-        handleDel (deleteVals) {
-            tableAxios.axiosDelete('/deleteTeacher', this, deleteVals);
+        //得到子组件传过来的当前是第几页
+        handlePage (value) {
+            this.pageNum = value;
+            this.init();
         },
-        //修改--后台
-        handleChange (currentVal) {
-            tableAxios.axiosPut('/updateTeacher', this, currentVal);
+        //得到子组件传过来的当前页的size
+        handlePageSize (value) {
+            this.pageSize = value;
+            this.init();
         },
-        //查询--前台
-        search (data, argumentObj) {
-            let res = data;
-            let dataClone = data;
-            for (let argu in argumentObj) {
-                if (argumentObj[argu].length > 0) {
-                    res = dataClone.filter(d => {
-                        return d[argu].indexOf(argumentObj[argu]) > -1;
-                    });
-                    dataClone = res;
-                }
-            }
-            return res;
+        //得到查询的下拉框数据
+        handleSearchBySelect (value) {
+            let cloneValue = value.map((item) => {              
+                return item.value;
+            });
+            this.searchBySchoolSelect = cloneValue.join(","); 
+            this.handleSearch();
         },
         //执行查询
         handleSearch () {
-            this.tableDataList = this.initTableData;
-            this.tableDataList = this.search(this.tableDataList, {name: this.searchByName});
+            tableAxios.axiosGet('/getTeachersBySpeci?' + "pageNum=" + this.pageNum + "&pageSize=" + this.pageSize + "&nameValue=" + this.searchByName + "&schoolIds=" + this.searchBySchoolSelect, this); //获取--后台                     
         }, 
+        //批量删除--后台
+        handleBatchDel (deleteVals) {
+            tableAxios.axiosDelete('/deleteTeachers?' + "pageNum=" + this.pageNum + "&pageSize=" + this.pageSize, this, deleteVals);
+        },        
+        //删除--后台
+        handleDel (deleteVals) {
+            tableAxios.axiosDelete('/deleteTeacher?' + "pageNum=" + this.pageNum + "&pageSize=" + this.pageSize, this, deleteVals);
+        },
+        //修改--后台
+        handleChange (currentVal) {
+            tableAxios.axiosPut('/updateTeacher?' + "pageNum=" + this.pageNum + "&pageSize=" + this.pageSize, this, currentVal);
+        },
     },
     created () {
         this.init(); //获取数据

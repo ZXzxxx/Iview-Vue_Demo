@@ -13,7 +13,7 @@
                 <Icon type="grid"/>
                 XXX
             </p>
-            <div style="margin:0px 10px;overflow: hidden">  <!--溢出部分隐藏-->
+            <div style="margin:0px 10px;overflow: auto">  <!--溢出部分隐藏scroll-->
                 <Button icon='plus' type="primary" shape="circle" style="margin-right:15px;margin-left:10px" @click="handleAddOperation">增添数据</Button> 
                 <Poptip
                     confirm
@@ -25,7 +25,7 @@
                 </Poptip>
                 <Button icon='ios-search-strong' shape="circle" style="float:right;margin:3px 15px"><i-switch size="small" v-model="showSearch"/></Button>              
             </div>
-            <div style="margin:0px 10px;overflow: hidden" v-if="showSearch">
+            <div style="margin:0px 10px;overflow: auto" v-if="showSearch">
                 <Card :bordered="false"> <!--无边框-->
                     <div>
                         <slot name="search-slot"></slot>
@@ -35,14 +35,14 @@
             <!--
                     注意!!!  如果想自定义列的颜色的话，就不能用斑马线属性stripe [一行白一行灰的显示]
             -->
-            <div style="margin:0px 10px;overflow: hidden">
+            <div style="margin:0px 10px;overflow: auto">
                 <Table :ref="refName" :columns="columnsList" :data="value" size="small" @on-selection-change="handleSelectionsData"></Table>
             </div>
             <!--分页-->
-            <div style="margin: 10px;overflow: hidden">
+            <div style="margin: 10px;overflow: auto">
                 <div style="float: right;">
-                    <!-- <Page :total="pageTotal" :current="pageNum" :page-size="pageSize" size="small" show-elevator show-sizer show-total
-                            @on-change="handlePage" @on-page-size-change="handlePageSize"></Page> -->
+                    <Page :total="pageTotal" :current="pageNum" :page-size="pageSize" size="small" show-elevator show-sizer show-total
+                            @on-change="handlePage" @on-page-size-change="handlePageSize"></Page>
                 </div>
             </div>
         </Card>
@@ -68,12 +68,14 @@ export default {
             type: Boolean,
             default: false   
         },
-
         allSelectUrls: Object, //存放所有该表中用到的所有下拉框的url  [自定义写的]
+        pageTotal: Number, //一共的条数, 要从后台得到
     },
     data () {  //data必须定义为函数形式，然后有返回值    : function（）==（）
         return { //以下定义的，是该组件 自己的数据
-            // pageTotal: 0,
+            pageNum: 1, //当前的页数， 不能是0
+            pageSize: 10, //当前显示的数据条数
+
             selectionsData:[],  //多选选择的表格数据
             addData: [],   //暂存新增的一行数据
             showSearch: false,  //是否显示搜索卡片
@@ -148,32 +150,39 @@ export default {
                     return this.thisTableData[index]; //返回更新后的该行的表格data
                 }else{  //此时表格data还是空的. 
                     this.$set(item, 'editting', false);  //给当前item项添加新属性,editting,表示当前行的编辑状态
-                    this.$set(item, 'saving', true);    //saving,表示当前行的保存状态
                     let edittingCell = {};  
                     editableCell.forEach(item => {
                         edittingCell[item.key] = false //editableCell中每个item的key值作为edittingCell的属性名,表示当前列的编辑状态
                     });
-                    this.$set(item, 'edittingCell', edittingCell);  
+                    this.$set(item, 'edittingCell', edittingCell);  //editableCells
                     return item;  //返回初次初始化的该行的表格data
                 }
             });
 
             vm.thisTableData = res;   //将过滤好的表格data赋值
-            this.edittingStore = JSON.parse(JSON.stringify(this.thisTableData));
+            this.edittingStore = JSON.parse(JSON.stringify(this.thisTableData));  //暂存
             
             //遍历表头, 不能只遍历可编辑的表头, 因为对不可编辑列也有相应的操作进行. 将可编辑的表头列打开为编辑框
             this.columnsList.forEach(item => {
 
                 if (item.editable) { //如果该表头列是可编辑的.  item是{title: '姓名',align: 'center',key: 'name', editable: true}这个东西  
                     item.render = (h,param)=>{  //渲染该item
-                        let currentRow = this.thisTableData[param.index]; //得到当前行数据
-                        if(currentRow.editting){ //进行的是整行编辑
+                        let currentRow = this.thisTableData[param.index]; //得到当前行数据[带状态]
+                        let currentRowValue = this.value[param.index]; //得到当前行数据[后台的]
+
+                        if(currentRow.adding){ //必须先判断是不是增加.   因为增加状态也是编辑状态. 但是增加完了之后
                             return h('div',
                                 [
                                     tableEles(this, h, param, item)
                                 ]
                             );
-                        }else {//可进行单列编辑
+                        }else if(currentRow.editting){ //进行的是整行编辑
+                            return h('div',
+                                [
+                                    tableEles(this, h, param, item)
+                                ]
+                            );
+                        }else{//可进行单列编辑.  此时是没打开整行编辑的状态             
                             if(this.editIncell) {//有进行单列编辑的列
                                 //可编辑数据和编辑按钮都在这渲染
                                 return h('Row', { //行
@@ -186,7 +195,7 @@ export default {
                                     h('Col', [  //数据列
                                         //Col里面的元素内容
                                         //单列打开， true时编辑框状态，false时span状态    
-                                        !currentRow.edittingCell[param.column.key] ? (item.cellType=="object") ? h('span', currentRow[item.key].value) : h('span', currentRow[item.key]) : tableEles(this, h, param, item)
+                                          !currentRow.edittingCell[param.column.key] ? (item.cellType=="object") ? (currentRowValue[item.key]==null) ? h('span', "无") : h('span', currentRowValue[item.key].value) : h('span', currentRow[item.key]) : tableEles(this, h, param, item)
                                     ]),
                                     h('Col', [  //编辑按钮
                                         //判断该列的编辑状态，为true时，显示保存按钮，false时显示编辑按钮
@@ -194,7 +203,7 @@ export default {
                                     ])
                                 ]);
                             }else{//没有进行单列编辑的列
-                                return (item.cellType=="object") ? h('span', currentRow[item.key].value) : h('span', currentRow[item.key]);  //只显示着数据，不显示编辑按钮
+                              return ((item.cellType=="object") ? (currentRowValue[item.key]==null) ? h('span', "无") : h('span', currentRowValue[item.key].value) : h('span', currentRow[item.key]));
                             }
                         }
                     }
@@ -205,7 +214,6 @@ export default {
                     item.render = (h, param) => {
                         let currentRowData = this.thisTableData[param.index]; 
                         let editAndDelete = []; //来放编辑和删除按钮的数组
-                        let addAndCancel = [];  //来放保存和取消按钮的数组
                         item.handle.forEach(item => {  //遍历表头handle这一item里面的item
                             switch (item) {
                                 case 'edit':
@@ -213,12 +221,6 @@ export default {
                                     break;
                                 case 'delete':
                                     editAndDelete.push(tableAxios.deleteButton(this, h, currentRowData, param.index));
-                                    break;
-                                case 'add':
-                                    // addAndCancel.push(tableAxios.editButton(this, h, currentRowData, param.index));
-                                    break;
-                                case 'cancel':
-                                    // addAndCancel.push(tableAxios.deleteButton(this, h, currentRowData, param.index));
                                     break;
                             }                           
                         });
@@ -232,10 +234,9 @@ export default {
             this.selectionsData = selection;  //获取到选中的数据
         },
         //添加新的一行数据. 因为添加的时候需要时打开状态。所以editting为true。表示当前是编辑框状态。
-        handleAddOperation() {
-            this.thisTableData.push({'editting':'true','edittingCell':{'name':'false','work':'false'},'name':'123','sex':'','work':{}});  
-            console.log("添加测试");
-            console.log(this.thisTableData);
+        handleAddOperation() {  
+            this.value.unshift({});  //表格上添加一行
+            this.thisTableData.unshift({'editting': 'true', 'adding':'true'}); //给添加的这行添加状态，是编辑状态
         },
         //处理批量删除操作
         handleBatchDeletion() {
@@ -256,7 +257,6 @@ export default {
             clonedData.forEach(item => {  //遍历这些数据的item，删除每个item对应的以下三个属性               
                 delete item.editting;
                 delete item.edittingCell;
-                delete item.saving;
             });
             return clonedData; 
         },
@@ -266,15 +266,18 @@ export default {
 
             delete objectData.editting;
             delete objectData.edittingCell;
-            delete objectData.saving;
 
             return objectData; 
         },        
-        //分页处理事件××
-        changePage () {
-            // The simulated data is changed directly here, and the actual usage scenario should fetch the data from the server
-            // this.tableData1 = this.mockTableData1();
+        //分页处理事件
+        handlePage (value) {
+            this.pageNum = value;
+            this.$emit('handlePage', value);
         },    
+        handlePageSize (value) {
+            this.pageSize = value;
+            this.$emit('handlePageSize', value);
+        }, 
     },
 
     //监听value的变化×   单列编辑的时候触发
