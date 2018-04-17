@@ -159,7 +159,7 @@ export default {
             });
 
             vm.thisTableData = res;   //将过滤好的表格data赋值
-            this.edittingStore = JSON.parse(JSON.stringify(this.thisTableData));  //暂存
+            // this.edittingStore = JSON.parse(JSON.stringify(this.thisTableData));  //暂存
             
             //遍历表头, 不能只遍历可编辑的表头, 因为对不可编辑列也有相应的操作进行. 将可编辑的表头列打开为编辑框
             this.columnsList.forEach(item => {

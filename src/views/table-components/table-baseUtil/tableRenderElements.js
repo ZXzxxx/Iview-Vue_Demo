@@ -36,7 +36,7 @@ const rowSelect = (vm, h, param, item) => {
         on: {
             'select-onChange' (value) {
                 let key = param.column.key;
-                vm.edittingStore[param.index][key] = value;        
+                vm.thisTableData[param.index][key] = value;        
             }
         }
     });
@@ -55,7 +55,7 @@ const rowInput = (vm, h, param, item) => {
         on: {
             'on-change' (event) {
                 let key = param.column.key; 
-                vm.edittingStore[param.index][key] = event.target.value;                   
+                vm.thisTableData[param.index][key] = event.target.value;                   
             }
         }
     });   
