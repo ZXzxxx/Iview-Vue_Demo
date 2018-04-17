@@ -75,7 +75,6 @@ export default {
         return { //以下定义的，是该组件 自己的数据
             pageNum: 1, //当前的页数， 不能是0
             pageSize: 10, //当前显示的数据条数
-
             selectionsData:[],  //多选选择的表格数据
             addData: [],   //暂存新增的一行数据
             showSearch: false,  //是否显示搜索卡片

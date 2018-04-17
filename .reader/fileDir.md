@@ -18,16 +18,4 @@
 
 
 
-未知：
-store  --  装了vuex  创建的项目文件夹，用来存放数据模型用的
-template
-vendors--引入内容??
-view:
-    own-space--个人中心
-    my-components--组件???
-    message--消息中心
-    main-components--主界面的一些组件???
-        breadcrumb-nav.vue---???
-    international--语言切换
-    home---???
 
