@@ -55,7 +55,7 @@
 //导入js文件
 import tableAxios from './table-baseUtil/tableAxios';
 import tableEles from './table-baseUtil/tableRenderElements';
-import index from 'vue';
+// import index from 'vue';
 
 
 //暴露出来，外部才能找到
