@@ -68,7 +68,7 @@ export default {
             pageSize: 10, //当前显示的数据条数
             pageTotals:0,//总条数
             sortKey:'',//排序列的key值
-            sortOrder:''//排序方式
+            sortOrder:''//排序方式 
         };
     },
     methods: {
