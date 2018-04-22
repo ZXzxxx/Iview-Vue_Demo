@@ -32,7 +32,7 @@ export const editInlineAndCellColumn = [
         align: 'center',
         key: 'no',
         editable: true,  //可编辑
-        sortable: true,  //可排序
+        sortable: 'custom',  //远程排序
     },
     {
         title: '教研室',

@@ -104,12 +104,10 @@ const editButton = (vm, h, currentRow, index) => {
                     if (currentRow.adding) {      
                         delete vm.thisTableData[0].adding; //删掉adding属性                         
                         vm.thisTableData[index].editting = false;  //点击保存按钮之后, 这行数据的编辑状态变为false
-                        // vm.thisTableData = JSON.parse(JSON.stringify(vm.edittingStore));//因为修改的数据保存在edittingStore里面呢,所以得重新赋值一下,然后才能得到当前最新数据,传给后台
                         let edittingRow = vm.thisTableData[index]; //当前正在编辑的该行的数据                                  
                         //父组件@on-change的时候，可以用这两个参数
                         vm.$emit('on-change', vm.handleObjectDataToBackData(edittingRow));  //应该由父组件做这件事  因为每个父组件传的url是不一样的
                     }else {                                 
-                        // vm.edittingStore[index].saving = true;  //点击保存按钮之后，这行数据的保存状态变为true
                         vm.thisTableData[index].editting = false;  //点击保存按钮之后, 这行数据的编辑状态变为false
                         vm.thisTableData = JSON.parse(JSON.stringify(vm.thisTableData));//因为修改的数据保存在edittingStore里面呢,所以得重新赋值一下,然后才能得到当前最新数据,传给后台
             
@@ -185,8 +183,7 @@ const incellEditBtn = (vm, h, param) => {
         },
         on: {
             click: (event) => {
-                vm.thisTableData[param.index].edittingCell[param.column.key] = true; 
-                // vm.thisTableData[param.index].saving = false;  
+                vm.thisTableData[param.index].edittingCell[param.column.key] = true;  
             }
         }
     });
@@ -203,14 +200,11 @@ const saveIncellEditBtn = (vm, h, param) => {
         on: {
             'on-ok': () => {
                 vm.thisTableData[param.index].edittingCell[param.column.key] = false;
-                // vm.edittingStore[param.index].saving = true;  
-                // vm.thisTableData = JSON.parse(JSON.stringify(vm.thisTableData));
                 let edittingRow = vm.thisTableData[param.index]; 
                 vm.$emit('on-change', vm.handleObjectDataToBackData(edittingRow));
             },
             'on-cancel' : ()=>{
                 vm.thisTableData[param.index].edittingCell[param.column.key] = false;
-                // vm.thisTableData[param.index].saving = false;  
             }
         }
     },[

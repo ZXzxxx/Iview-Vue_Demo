@@ -22,7 +22,8 @@
                         :columns-list="tableColumsList"
                         :page-total="pageTotals"
                         @handlePage="handlePage"
-                        @handlePageSize="handlePageSize"                       
+                        @handlePageSize="handlePageSize"    
+                        @handleSort="handleSort"                
                         >  <!--传参数-->
                                                                   
                         <!--插槽，插入需要的Dom-->
@@ -66,13 +67,15 @@ export default {
             pageNum: 1, //当前的页数， 不能是0
             pageSize: 10, //当前显示的数据条数
             pageTotals:0,//总条数
+            sortKey:'',//排序列的key值
+            sortOrder:''//排序方式
         };
     },
     methods: {
         //初始化数据
         init () {
             this.tableColumsList = tableData.editInlineAndCellColumn; //表格表头
-            tableAxios.axiosGet('/getAllTeacher?' + "pageNum=" + this.pageNum + "&pageSize=" + this.pageSize, this); //获取--后台
+            tableAxios.axiosGet('/getAllTeacher?' + "pageNum=" + this.pageNum + "&pageSize=" + this.pageSize + "&sortKey=" + this.sortKey + "&sortOrder=" + this.sortOrder, this); //获取--后台
             this.crud_selectUrls = {     //这个表格上涉及到的所有下拉框的url地址
                 'school' : '/getAllSchool',   
             };           
@@ -85,6 +88,12 @@ export default {
         //得到子组件传过来的当前页的size
         handlePageSize (value) {
             this.pageSize = value;
+            this.init();
+        },
+        //得到当前排序的信息
+        handleSort (sortKey, sortOrder) {
+            this.sortKey = sortKey;
+            this.sortOrder = sortOrder;
             this.init();
         },
         //得到查询的下拉框数据

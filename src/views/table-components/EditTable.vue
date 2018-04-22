@@ -36,7 +36,7 @@
                     注意!!!  如果想自定义列的颜色的话，就不能用斑马线属性stripe [一行白一行灰的显示]
             -->
             <div style="margin:0px 10px;overflow: auto">
-                <Table :ref="refName" :columns="columnsList" :data="value" size="small" @on-selection-change="handleSelectionsData"></Table>
+                <Table :ref="refName" :columns="columnsList" :data="value" size="small" @on-selection-change="handleSelectionsData" @on-sort-change="handleSort"></Table>
             </div>
             <!--分页-->
             <div style="margin: 10px;overflow: auto">
@@ -109,8 +109,7 @@ export default {
              * 2. 定义一个临时的数组变量, 克隆value值, 因为value的值是从后台获取的，以防格式不标准, 先从对象中解析出json, 再将json解析成对象.
              * 3. value的值就是从后台获取到的表格数据. 因为要进行CRUD操作, 所以需要给表格数据添加操作状态新属性，用来分辨当前数据的操作状态. 
              *    所以需要一个新的变量thisTableData来存这些东西,进行判断.
-             *      3.1 定义一个临时的数组变量，对表格data数据初始化的时候，对这个临时的数组变量操作，再把值赋值给thisTableData.    
-             * 4.                
+             *      3.1 定义一个临时的数组变量，对表格data数据初始化的时候，对这个临时的数组变量操作，再把值赋值给thisTableData.                   
              */
 
             //可编辑的表头列
@@ -159,7 +158,6 @@ export default {
             });
 
             vm.thisTableData = res;   //将过滤好的表格data赋值
-            // this.edittingStore = JSON.parse(JSON.stringify(this.thisTableData));  //暂存
             
             //遍历表头, 不能只遍历可编辑的表头, 因为对不可编辑列也有相应的操作进行. 将可编辑的表头列打开为编辑框
             this.columnsList.forEach(item => {
@@ -194,7 +192,7 @@ export default {
                                     h('Col', [  //数据列
                                         //Col里面的元素内容
                                         //单列打开， true时编辑框状态，false时span状态    
-                                          !currentRow.edittingCell[param.column.key] ? (item.cellType=="object") ? (currentRowValue[item.key]==null) ? h('span', "无") : h('span', currentRowValue[item.key].value) : h('span', currentRow[item.key]) : tableEles(this, h, param, item)
+                                          !currentRow.edittingCell[param.column.key] ? (item.cellType=="object") ? (currentRowValue[item.key]==null) ? h('span', "无") : h('span', currentRowValue[item.key].value) : h('span', currentRowValue[item.key]) : tableEles(this, h, param, item)
                                     ]),
                                     h('Col', [  //编辑按钮
                                         //判断该列的编辑状态，为true时，显示保存按钮，false时显示编辑按钮
@@ -202,7 +200,7 @@ export default {
                                     ])
                                 ]);
                             }else{//没有进行单列编辑的列
-                              return ((item.cellType=="object") ? (currentRowValue[item.key]==null) ? h('span', "无") : h('span', currentRowValue[item.key].value) : h('span', currentRow[item.key]));
+                              return ((item.cellType=="object") ? (currentRowValue[item.key]==null) ? h('span', "无") : h('span', currentRowValue[item.key].value) : h('span', currentRowValue[item.key]));
                             }
                         }
                     }
@@ -268,15 +266,20 @@ export default {
 
             return objectData; 
         },        
-        //分页处理事件
+        //处理当前第几页
         handlePage (value) {
             this.pageNum = value;
             this.$emit('handlePage', value);
-        },    
+        },   
+        //处理当前页有几条 
         handlePageSize (value) {
             this.pageSize = value;
             this.$emit('handlePageSize', value);
         }, 
+        //处理排序事件
+        handleSort (sort) {  //sort有column、key、order
+            this.$emit('handleSort', sort.key, sort.order);
+        }
     },
 
     //监听value的变化×   单列编辑的时候触发
