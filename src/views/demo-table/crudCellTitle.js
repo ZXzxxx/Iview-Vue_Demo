@@ -49,7 +49,6 @@ export const editInlineAndCellColumn = [
     }
 ];
 
-
 const tableData = {
     editInlineAndCellColumn: editInlineAndCellColumn,
 };

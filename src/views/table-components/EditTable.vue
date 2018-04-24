@@ -1,7 +1,9 @@
 <!--crud-table组件-->
 
 <style lang="less">
-    @import 'edit-table.less';
+    @import '../../style/edit-table.less';
+    @import '../../style/common.less';
+    @import '../../style/table.less';
 </style>
 
 <!--分页××   其他√-->
@@ -79,7 +81,7 @@ export default {
             addData: [],   //暂存新增的一行数据
             showSearch: false,  //是否显示搜索卡片
             thisTableData: [],   //添加了判断状态的属性
-            edittingStore: [],    //暂存修改的数据  -- 作为一个中间变量
+            // edittingStore: [],    //暂存修改的数据  -- 作为一个中间变量
         };
     },
     /**

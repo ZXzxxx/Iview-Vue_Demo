@@ -1,10 +1,5 @@
 <!--CRUD父组件  模板-->
 
-<style lang="less">
-    @import '../../style/common.less';
-    @import '../../style/table.less';
-</style>
-
 <!--组件模板-->
 <template>
   <div style="position: absolute;overflow:auto;height:100%;width:100%;">  <!--注意style-->
