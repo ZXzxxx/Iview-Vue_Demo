@@ -13,8 +13,8 @@
                         @on-change="handleChange"
                         @on-delete="handleDel"
                         :editIncell="true"
-                        :all-select-urls="crud_selectUrls"
-                        :columns-list="tableColumsList"
+                        :all-select-urls="allSelectUrls"
+                        :table-header="tableHeader"
                         :page-total="pageTotals"
                         @handlePage="handlePage"
                         @handlePageSize="handlePageSize"    
@@ -35,13 +35,13 @@
 
 <script>
 //引入js文件
-import tableAxios from '../table-components/table-baseUtil/tableAxios';
+import tableAxios from '../table_components/table_base_util/TableAxios';
 //引入单文件组件
-import editTable from '../table-components/EditTable.vue';
-import yearPicker from '../table-components/base-components/yearPicker';
-import cascader from '../table-components/base-components/cascader.vue';
-import tableData from './crudCellTitle';
-import tableSelect from '../table-components/base-components/tableSelect.vue';
+import editTable from '../table_components/EditTable.vue';
+import crudHeader from './CrudHeader';
+import yearPicker from '../table_components/table_base_components/YearPicker';
+import cascader from '../table_components/table_base_components/Cascader.vue';
+import tableSelect from '../table_components/table_base_components/TableSelect.vue';
 
 
 export default {
@@ -56,9 +56,9 @@ export default {
         return {
             searchByName: '',
             searchBySchoolSelect: '',
-            tableColumsList: [],//表格列
+            tableHeader: [],//表格列
             tableDataList: [],  //表格具体数据   
-            crud_selectUrls: {}, //下拉框URL
+            allSelectUrls: {}, //下拉框URL
             pageNum: 1, //当前的页数， 不能是0
             pageSize: 10, //当前显示的数据条数
             pageTotals:0,//总条数
@@ -69,9 +69,9 @@ export default {
     methods: {
         //初始化数据
         init () {
-            this.tableColumsList = tableData.editInlineAndCellColumn; //表格表头
+            this.tableHeader = crudHeader; //表格表头
             tableAxios.axiosGet('/getAllTeacher?' + "pageNum=" + this.pageNum + "&pageSize=" + this.pageSize + "&sortKey=" + this.sortKey + "&sortOrder=" + this.sortOrder, this); //获取--后台
-            this.crud_selectUrls = {     //这个表格上涉及到的所有下拉框的url地址
+            this.allSelectUrls = {     //这个表格上涉及到的所有下拉框的url地址
                 'school' : '/getAllSchool',   
             };           
         },

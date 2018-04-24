@@ -1,4 +1,4 @@
-export const editInlineAndCellColumn = [
+export const crudHeader = [
     {
         type: 'selection',
         width: 60,
@@ -49,8 +49,5 @@ export const editInlineAndCellColumn = [
     }
 ];
 
-const tableData = {
-    editInlineAndCellColumn: editInlineAndCellColumn,
-};
 
-export default tableData;
+export default crudHeader;

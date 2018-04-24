@@ -1,12 +1,10 @@
-<!--crud-table组件-->
-
+<!--CRUD底层组件-->
 <style lang="less">
     @import '../../style/edit-table.less';
     @import '../../style/common.less';
     @import '../../style/table.less';
 </style>
 
-<!--分页××   其他√-->
 <template>
     <div>
         <Card style="height:auto">
@@ -38,7 +36,7 @@
                     注意!!!  如果想自定义列的颜色的话，就不能用斑马线属性stripe [一行白一行灰的显示]
             -->
             <div style="margin:0px 10px;overflow: auto">
-                <Table :ref="refName" :columns="columnsList" :data="value" size="small" @on-selection-change="handleSelectionsData" @on-sort-change="handleSort"></Table>
+                <Table :ref="refName" :columns="tableHeader" :data="value" :loading="loadingState"  size="small" @on-selection-change="handleSelectionsData" @on-sort-change="handleSort"></Table>
             </div>
             <!--分页-->
             <div style="margin: 10px;overflow: auto">
@@ -55,16 +53,15 @@
 
 
 //导入js文件
-import tableAxios from './table-baseUtil/tableAxios';
-import tableEles from './table-baseUtil/tableRenderElements';
-// import index from 'vue';
+import tableAxios from './table_base_util/TableAxios';
+import tableEles from './table_base_util/TableRenderElements';
 
 
 //暴露出来，外部才能找到
 export default {
     props: {//定义传进来的参数值的类型
         refName: String,  //组件指针名
-        columnsList: Array,  //表格表头 [这个根据表格情况自定义写的]
+        tableHeader: Array,  //表格表头 [这个根据表格情况自定义写的]
         value: Array, //表格上显示的数据内容 [从后台get到的]   就是父组件v-model双向绑定的值   这里必须是value才行
         editIncell: { //该列是否可以进行单列编辑的状态判断,默认false
             type: Boolean,
@@ -75,13 +72,13 @@ export default {
     },
     data () {  //data必须定义为函数形式，然后有返回值    : function（）==（）
         return { //以下定义的，是该组件 自己的数据
+            loadingState: false,
             pageNum: 1, //当前的页数， 不能是0
             pageSize: 10, //当前显示的数据条数
             selectionsData:[],  //多选选择的表格数据
             addData: [],   //暂存新增的一行数据
             showSearch: false,  //是否显示搜索卡片
             thisTableData: [],   //添加了判断状态的属性
-            // edittingStore: [],    //暂存修改的数据  -- 作为一个中间变量
         };
     },
     /**
@@ -89,7 +86,9 @@ export default {
      * 组件初始化好的那一时刻调用的函数
      */
     created (){ 
+        this.loadingState = true;//开始是加载状态
         this.init();
+        this.loadingState = false;//初始化结束就不是加载状态了
     },
     methods: {  //定义一些方法的 实现
         
@@ -97,40 +96,19 @@ export default {
         init () { 
 
             //刚开始的thisTableData是空的
-            
-            /**
-             *  使用var声明的变量，其作用域为该语句所在的函数内，且存在变量提升现象；
-                用let声明的变量，其作用域为该语句所在的代码块,即一个{}内，不存在变量提升；[推荐使用这个]
-                使用const声明的是常量，在后面出现的代码中不能再修改该常量的值。
-             */
-
             let vm = this; //vm 的值等于当前组件  因为这个方法里面有很多箭头函数或者匿名函数。所以先把this赋值好给vm。
-
-            /**
-             * 1. 定义一个可编辑的表头列数组，编辑的时候遍历他们，打开他们的编辑框.
-             * 2. 定义一个临时的数组变量, 克隆value值, 因为value的值是从后台获取的，以防格式不标准, 先从对象中解析出json, 再将json解析成对象.
-             * 3. value的值就是从后台获取到的表格数据. 因为要进行CRUD操作, 所以需要给表格数据添加操作状态新属性，用来分辨当前数据的操作状态. 
-             *    所以需要一个新的变量thisTableData来存这些东西,进行判断.
-             *      3.1 定义一个临时的数组变量，对表格data数据初始化的时候，对这个临时的数组变量操作，再把值赋值给thisTableData.                   
-             */
-
             //可编辑的表头列
-            let editableCell = this.columnsList.filter(item => {   //item是columnsList[表格表头]里的每一个对象,filter():返回一个符合function条件的item元素数组
-                if (item.editable) { //判断是否有editable这个属性段
-                    if(item.editable == true){ //该属性段值为true表示是可编辑的.
-                        return item;
-                    }                    
+            let editableCell = this.tableHeader.filter(item => {   //item是columnsList[表格表头]里的每一个对象,filter():返回一个符合function条件的item元素数组
+                if (item.editable == true) { //该属性段值为true表示是可编辑的
+                    return item;                    
                 }           
             });
-
             //JSON.stringify()  从对象中解析出json字符串
             //JSON.parse()      将json字符串解析成对象
             let cloneValue = JSON.parse(JSON.stringify(vm.value)); //克隆一份表格数据
-
             //定义一个新的数组变量，对克隆的表格数据通过map方法，添加操作状态新属性            
             let res = cloneValue.map((item,index) => {  //map():返回一个新的Array，每个元素为调用function的结果,是执行了这个function的结果值. 
                 let isEditting = false;   //当前表格的状态,是否打开编辑框进行编辑操作, 需要一个外部的状态判断.
-                let isAdding = false;  //????
                 if (vm.thisTableData[index]) {  //如果此时表格data已经有数据了,也就是说明已经进行过初始化了,所以现在的表格data是有新定义的状态属性的.
                     if (vm.thisTableData[index].editting) { //如果这一行的editting是true, 表示这一行正处于编辑状态.
                         isEditting = true;  //编辑状态true
@@ -162,9 +140,9 @@ export default {
             vm.thisTableData = res;   //将过滤好的表格data赋值
             
             //遍历表头, 不能只遍历可编辑的表头, 因为对不可编辑列也有相应的操作进行. 将可编辑的表头列打开为编辑框
-            this.columnsList.forEach(item => {
+            this.tableHeader.forEach(item => {
 
-                if (item.editable) { //如果该表头列是可编辑的.  item是{title: '姓名',align: 'center',key: 'name', editable: true}这个东西  
+                if (item.editable == true) { //如果该表头列是可编辑的.  item是{title: '姓名',align: 'center',key: 'name', editable: true}这个东西  
                     item.render = (h,param)=>{  //渲染该item
                         let currentRow = this.thisTableData[param.index]; //得到当前行数据[带状态]
                         let currentRowValue = this.value[param.index]; //得到当前行数据[后台的]
@@ -284,11 +262,10 @@ export default {
         }
     },
 
-    //监听value的变化×   单列编辑的时候触发
+    //监听value的变化
     watch: {
         value (data) {
             console.log("监听事件发生")
-            console.log(this.thisTableData);
             this.init();
         },
     }

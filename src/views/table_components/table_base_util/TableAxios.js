@@ -30,10 +30,18 @@ const axiosPut = (url, componentVm, currentVal) => {
         if(response.status === 200){
             componentVm.tableDataList = response.data.rows;
             componentVm.pageTotals = response.data.total;
-            componentVm.$Message.success({
-                content: '数据修改成功',
-                duration: 5,
-            });
+            if () {
+                componentVm.$Message.success({
+                    content: '数据修改成功',
+                    duration: 5,
+                });
+            }else {
+                componentVm.$Message.success({
+                    content: '数据添加成功',
+                    duration: 5,
+                });
+            }
+
         }else{
             componentVm.$Message.error("数据修改失败");
         } 

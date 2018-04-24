@@ -4,8 +4,8 @@
 
 
 //引入单文件组件
-import tableSelect from '../base-components/tableSelect';
-import tableInputNum from '../base-components/inputNum';
+import tableSelect from '../table_base_components/TableSelect';
+import tableInputNum from '../table_base_components/InputNum';
 
 //获取相应的render元素
 const tableEles = (vm, h, param, item) => {
