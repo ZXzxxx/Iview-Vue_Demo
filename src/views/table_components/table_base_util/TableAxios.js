@@ -35,7 +35,7 @@ const axiosPut = (url, componentVm, currentVal) => {
                 duration: 5,
             });
         }else{
-            componentVm.$Message.error("数据修改失败");
+            componentVm.$Message.error("数据操作失败");
         } 
     })
     .catch(function (error) {
